@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-label="Lightsphere signed mode and network mode, both settling to an anchor contract on a Hiero network">
+<rect width="960" height="430" rx="16" fill="#FFFFFF"/>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#FF3C00"/></marker></defs>
+<rect x="24" y="24" width="444" height="262" rx="12" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="44" y="54" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="17" font-weight="700" fill="#141414">Signed mode</text>
+<text x="44" y="76" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#57606A">2–16 parties co-sign every state</text>
+<rect x="492" y="24" width="444" height="262" rx="12" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="512" y="54" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="17" font-weight="700" fill="#141414">Network mode</text>
+<text x="512" y="76" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#57606A">a Hiero network, connected over CLPR</text>
+<circle cx="246" cy="170" r="74" fill="#FFE6DC" stroke="#FF3C00" stroke-width="2"/>
+<circle cx="202" cy="170" r="17" fill="#FF3C00"/>
+<text x="202" y="174" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">A</text>
+<circle cx="290" cy="170" r="17" fill="#FF3C00"/>
+<text x="290" y="174" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">B</text>
+<path d="M224 162 Q246 144 268 162" fill="none" stroke="#FF3C00" stroke-width="2" marker-end="url(#ar)"/>
+<path d="M268 178 Q246 196 224 178" fill="none" stroke="#FF3C00" stroke-width="2" marker-end="url(#ar)"/>
+<text x="246" y="266" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#141414" text-anchor="middle">v1 … v1,000,000 signed off-ledger</text>
+<text x="46" y="150" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#57606A">EIP-712 states,</text>
+<text x="46" y="167" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#57606A">no fee per update,</text>
+<text x="46" y="184" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#57606A">no trust needed</text>
+<circle cx="714" cy="170" r="74" fill="#FFE6DC" stroke="#FF3C00" stroke-width="2"/>
+<line x1="757.9" y1="183.6" x2="730.8" y2="212.8" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="757.9" y1="183.6" x2="691.0" y2="209.8" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="757.9" y1="183.6" x2="668.5" y2="176.8" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="757.9" y1="183.6" x2="680.3" y2="138.7" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="757.9" y1="183.6" x2="717.5" y2="124.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="757.9" y1="183.6" x2="752.0" y2="144.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="730.8" y1="212.8" x2="691.0" y2="209.8" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="730.8" y1="212.8" x2="668.5" y2="176.8" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="730.8" y1="212.8" x2="680.3" y2="138.7" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="730.8" y1="212.8" x2="717.5" y2="124.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="730.8" y1="212.8" x2="752.0" y2="144.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="691.0" y1="209.8" x2="668.5" y2="176.8" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="691.0" y1="209.8" x2="680.3" y2="138.7" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="691.0" y1="209.8" x2="717.5" y2="124.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="691.0" y1="209.8" x2="752.0" y2="144.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="668.5" y1="176.8" x2="680.3" y2="138.7" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="668.5" y1="176.8" x2="717.5" y2="124.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="668.5" y1="176.8" x2="752.0" y2="144.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="680.3" y1="138.7" x2="717.5" y2="124.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="680.3" y1="138.7" x2="752.0" y2="144.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<line x1="717.5" y1="124.1" x2="752.0" y2="144.1" stroke="#FF3C00" stroke-opacity="0.35" stroke-width="1"/>
+<circle cx="757.9" cy="183.6" r="8" fill="#FF3C00"/>
+<circle cx="730.8" cy="212.8" r="8" fill="#FF3C00"/>
+<circle cx="691.0" cy="209.8" r="8" fill="#FF3C00"/>
+<circle cx="668.5" cy="176.8" r="8" fill="#FF3C00"/>
+<circle cx="680.3" cy="138.7" r="8" fill="#FF3C00"/>
+<circle cx="717.5" cy="124.1" r="8" fill="#FF3C00"/>
+<circle cx="752.0" cy="144.1" r="8" fill="#FF3C00"/>
+<text x="714" y="174" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#141414" text-anchor="middle">aBFT</text>
+<text x="806" y="150" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#57606A">its own</text>
+<text x="806" y="167" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#57606A">validators,</text>
+<text x="806" y="184" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#57606A">any members</text>
+<rect x="24" y="330" width="912" height="76" rx="12" fill="#FF3C00"/>
+<text x="480" y="362" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="17" font-weight="700" fill="#FFFFFF" text-anchor="middle">Anchor contract on a Hiero network (e.g. Hedera)</text>
+<text x="480" y="386" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#FFFFFF" fill-opacity="0.9" text-anchor="middle">escrows HBAR and HTS tokens · enforces the newest fully signed state · pays out</text>
+<path d="M246 274 V322" stroke="#FF3C00" stroke-width="2.5" marker-end="url(#ar)"/>
+<text x="256" y="302" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#141414">open · one settlement</text>
+<path d="M704 322 V246" stroke="#FF3C00" stroke-width="2.5" marker-end="url(#ar)"/>
+<path d="M724 246 V322" stroke="#FF3C00" stroke-width="2.5" marker-end="url(#ar)"/>
+<text x="736" y="296" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#141414">CLPR · deposits up,</text>
+<text x="736" y="313" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#141414">withdrawals and checkpoints down</text>
+</svg>

@@ -2,3 +2,4 @@ contracts/out/
 contracts/cache/
 harness/bin/
 ts/node_modules/
+tools/brand/node_modules/

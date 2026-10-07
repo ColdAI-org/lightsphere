@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/ColdAI-org/lightsphere/security/advisories/new
+    about: Report privately. Do not open a public issue.
+  - name: Discuss the Lightsphere HIP
+    url: https://github.com/hiero-ledger/hiero-improvement-proposals/discussions/1562
+    about: Questions and feedback on the specification itself.

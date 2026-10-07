@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="Lightsphere">
+  <title>Lightsphere</title>
+  <defs><mask id="ls-cut-2" maskUnits="userSpaceOnUse" x="0" y="0" width="128" height="128"><rect width="128" height="128" fill="#fff"/><path d="M28 54A36 12.5 0 0 0 100 54" transform="rotate(-20 64 54)" fill="none" stroke="#000" stroke-width="7"/></mask></defs>
+  <circle cx="64" cy="54" r="31" fill="#FFFFFF" mask="url(#ls-cut-2)"/>
+  <path d="M34 104H94" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+</svg>

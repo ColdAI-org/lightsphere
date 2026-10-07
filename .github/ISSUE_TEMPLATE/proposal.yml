@@ -1,0 +1,26 @@
+name: Design proposal
+description: A change to the state encoding, message formats, trust model or contract behaviour.
+labels: [proposal]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Changes that affect the wire format or trust model also need to be raised on the HIP
+        (hiero-ledger/hiero-improvement-proposals#1563), so all implementations stay compatible.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What changes, in the spec and in code. Which invariants does it touch?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

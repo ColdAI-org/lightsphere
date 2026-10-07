@@ -1,0 +1,131 @@
+# Contracts, Go harness and TypeScript client on every push and pull request.
+#
+# Every third-party action is pinned by full commit SHA; the tag is in the trailing comment.
+# Dependabot (.github/dependabot.yml) proposes SHA bumps.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  FOUNDRY_VERSION: v1.5.1
+  GO_VERSION: "1.24"
+  NODE_VERSION: "24"
+
+jobs:
+  contracts:
+    name: contracts (fmt, build, test)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: ${{ env.FOUNDRY_VERSION }}
+      - name: forge fmt --check
+        run: forge fmt --check
+      - name: forge build --sizes (EIP-170)
+        run: forge build --sizes --skip 'test/**'
+      - name: forge test
+        run: forge test -vv
+      - name: Upload build output
+        # The TypeScript end-to-end test deploys from contracts/out.
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: forge-out
+          path: contracts/out/
+          retention-days: 3
+          if-no-files-found: error
+
+  contracts-deep-fuzz:
+    name: contracts (deep fuzz, 10,000 runs)
+    needs: contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: ${{ env.FOUNDRY_VERSION }}
+      - name: forge test (fuzz only)
+        run: FOUNDRY_FUZZ_RUNS=10000 forge test --match-test testFuzz -vv
+
+  harness:
+    name: harness (Go vet, test, benchmark smoke)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: harness
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: harness/go.sum
+      - name: gofmt
+        run: test -z "$(gofmt -l .)"
+      - name: go vet
+        run: go vet ./...
+      - name: go test
+        run: go test -race ./...
+      - name: Committed report verifies
+        run: go run ./cmd/lsverify ../reports/m1max-secp256k1-2party.json
+      - name: Benchmark smoke run (5 s), then verify it
+        run: |
+          go run ./cmd/lsbench -duration 5s -warmup 1 -spheres 64 -out /tmp/smoke.json
+          go run ./cmd/lsverify /tmp/smoke.json
+
+  client:
+    name: client (typecheck, vectors, anvil end to end)
+    needs: contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ts
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ts/package-lock.json
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: ${{ env.FOUNDRY_VERSION }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: forge-out
+          path: contracts/out
+      - run: npm ci
+      - name: ABI is up to date
+        run: npm run abi && git diff --exit-code src/anchorAbi.ts
+      - run: npm run typecheck
+      - run: npm test
