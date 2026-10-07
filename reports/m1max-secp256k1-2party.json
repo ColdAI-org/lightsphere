@@ -1,0 +1,1220 @@
+{
+  "definition": "A SphereState with a new version, signed by every participant's secp256k1 signing key and verified by every other participant (Lightsphere HIP, Throughput accounting).",
+  "keyType": "secp256k1",
+  "spheres": 1024,
+  "participantsPerSphere": 2,
+  "workers": 10,
+  "durationSeconds": 70.000002458,
+  "warmupSeconds": 5,
+  "effectiveTransactions": 3265586,
+  "peakTps": 48061.13561242732,
+  "sustainedTps": 46688.138011895775,
+  "sustainedSeconds": 65.000000626,
+  "sustainedWindowAtLeast60s": true,
+  "perSecond": [
+    46243.90367394865,
+    45983.95981001913,
+    47927.86618539761,
+    43682.10920527302,
+    47019.06662601741,
+    42987.93547510885,
+    46531.08338370142,
+    46830.95120214884,
+    45779.06294621155,
+    47038.945105551065,
+    46465.03684677422,
+    45484.97912239458,
+    46304.93633071254,
+    46810.04484402296,
+    47351.01188510398,
+    47209.033423995665,
+    47505.950498799575,
+    46993.060715034444,
+    47058.94112926465,
+    47182.02165654794,
+    46395.0115987529,
+    47446.00787603731,
+    47090.76584520873,
+    47295.16270427992,
+    47005.03520677137,
+    47415.00791830633,
+    47342.04535367945,
+    46523.965153550096,
+    46953.980420190164,
+    46862.01368370799,
+    47085.97645701177,
+    47361.00592012574,
+    47180.053077559714,
+    47191.009815730045,
+    42839.93574009639,
+    47068.01567364922,
+    47513.03169119214,
+    46543.96704687133,
+    46932.99408644275,
+    46869.99807833008,
+    47079.013747072015,
+    46948.996056284326,
+    48061.13561242732,
+    46488.834402916706,
+    47319.97439989386,
+    47832.98005364731,
+    47050.049026151086,
+    45827.914026833285,
+    46123.06148204096,
+    47404.98620514901,
+    47117.980398920154,
+    47110.072596621874,
+    47612.94643543526,
+    45974.01535532113,
+    47401.025643954876,
+    47303.97237448014,
+    46895.46966114349,
+    47047.556187822796,
+    46859.01565091123,
+    47471.99800617609,
+    46830.94928208193,
+    47030.00395052033,
+    47097.06668944643,
+    44399.887179886675,
+    40372.05042469098,
+    46944.9922071313,
+    45971.022939540446,
+    46187,
+    47312.98230494461,
+    47204.001935364075
+  ],
+  "hardware": {
+    "cpu": "Apple M1 Max",
+    "logicalCores": 10,
+    "os": "darwin",
+    "arch": "arm64",
+    "go": "go1.24.0"
+  },
+  "chainId": 296,
+  "anchorContract": "0x00000000000000000000000000000000004c5350",
+  "settlementTxIds": [],
+  "settlementNote": "Offline run: no spheres were opened or settled on an anchor ledger. A conforming public report must list the anchor-ledger transaction IDs of every open and settlement.",
+  "samples": [
+    {
+      "params": {
+        "participants": [
+          "0x7D3173ee6eCc860c1A3599F68c36e18fAB648185",
+          "0x2Df1634B90A013C85b4dE56215E9D71421d70C9e"
+        ],
+        "signers": [
+          "0x7D3173ee6eCc860c1A3599F68c36e18fAB648185",
+          "0x2Df1634B90A013C85b4dE56215E9D71421d70C9e"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x03a6000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x0852f16e9c75be5708c7daa500efa499393e2dd8d13220bd87ed0ea0bf028739",
+      "version": 1600,
+      "balances": [
+        "1000000000032",
+        "999999999968"
+      ],
+      "appDataHash": "0x4006000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x44167133b4c83acc7b8e186ae730de73e5f67202dd5ea356745d991efedec173",
+      "signatures": [
+        "0xfab9b325102ef17d93a8947cd6f924046780574a2622ac9d95e4dcc46caac0b47a7c9bd40360dbb6148b401430b120e4d25b17a1f68e2b5cd2cb0a4d5270f5fb1b",
+        "0x925465f4e393db647902c13cbb2cc4dc66171007d7314227528438e7a3cbdbcd2c9249cc4c9748d1a02e03cf0d28512ba6a1b9f5f5d50c1b771f5535ceb3888d1c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0xD8311845Fc7602F7E029Fd5084d013203C50f1CF",
+          "0x517A55A242236F21Ffc448727E93a5aC6be494C8"
+        ],
+        "signers": [
+          "0xD8311845Fc7602F7E029Fd5084d013203C50f1CF",
+          "0x517A55A242236F21Ffc448727E93a5aC6be494C8"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x03c4000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x1292c134b1dd1c47204a6a38140404e6fd29031cadfe0f6079d86e068b533dfd",
+      "version": 1065,
+      "balances": [
+        "999999999939",
+        "1000000000061"
+      ],
+      "appDataHash": "0x2904000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x80692c9759dc414d013b4024080a3165179a0462ba00eeb6ea3f298159ecdfd3",
+      "signatures": [
+        "0x65efd2c465b5dd2a854cccb2ce30cecd39d8c5d6f8694ce81f6fb9e72beb8fa538fbce1aa4e1485401fd75f7e73810ed141020c11eb5faecf1fc97f27ee4aff11c",
+        "0x6e9999624116f31b1c499b83bb4c79b22328bc4aa571c05993b2f5887edf4138448ed00a6f889f9503f49b040fc8a12548ff6a79a1a56d3a38fd57be288ec7b51b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x45dFAE8F922b1A8F3ccF8c5C0634560e4399Df7b",
+          "0xf6b3BB5d72505ba7A10f7b3388444088239254dB"
+        ],
+        "signers": [
+          "0x45dFAE8F922b1A8F3ccF8c5C0634560e4399Df7b",
+          "0xf6b3BB5d72505ba7A10f7b3388444088239254dB"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x03ac000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x17c82ce123924e62db73a66fb3661040b8f4844e6988c1f3b65e717da7a14cf7",
+      "version": 1510,
+      "balances": [
+        "1000000000006",
+        "999999999994"
+      ],
+      "appDataHash": "0xe605000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x74203849c39765a5e008c68b150a2cb568818a2e94c250414d042fb6e08c0087",
+      "signatures": [
+        "0x5d07aa407fe9fc61ed5fe1a0b7df8527efc9ce0f9458d7fc735a091e80904d0e3b1bcb7b61c8ec22c5b557df073d1b35e1f787a9bd3f4b63c564ed6254179e381c",
+        "0xb192450723f0071cf2f4d4a7b7eaf2f02807639f1811359bda085005335477537c24b2f6bffcf1157e51c86faedcff7aee47cbd84c112aeea7dd9f6f0434b9ec1c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x5a268F9fe283CF2F77A3d22696A7d2394d428631",
+          "0x44A67D5d8cfb8d30c62213cC072681C7D5F074d6"
+        ],
+        "signers": [
+          "0x5a268F9fe283CF2F77A3d22696A7d2394d428631",
+          "0x44A67D5d8cfb8d30c62213cC072681C7D5F074d6"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x02fb000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x18f2b6465950e54bc1c1a436a2580d0f73eaf61467cd3f51c30109903904f6b8",
+      "version": 2682,
+      "balances": [
+        "999999999990",
+        "1000000000010"
+      ],
+      "appDataHash": "0x7a0a000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0xa5d6b073ddc82b056094fb1b566bd07a2dc2d4da913cfa7eea3876040bf29e9b",
+      "signatures": [
+        "0x23096acfcf339956c159453210a2f442824ffeb7e8ed2b08838352b368fb66a93fb48cd897b328ff7893629f73f8c2212d76ae4cdb43c1ab79f084d04d2b33c31b",
+        "0xf6e5efa29fb3143786076777817e776434ae667d51630e950c15791483b7f3ec48672597c96c07971d0a383094540cadd53fe760924b25ae05e5090a25d1205f1b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x9b821BB9b1674d6D0197B7A5B54e9b788DA2B774",
+          "0x03177B9321E8dD58b65A1E56BB1C9645A4123F19"
+        ],
+        "signers": [
+          "0x9b821BB9b1674d6D0197B7A5B54e9b788DA2B774",
+          "0x03177B9321E8dD58b65A1E56BB1C9645A4123F19"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x03bc000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x23b94cc1b72b78645303bdc4ab67d43ca5e8f98157945de26bd634cb6cd00abb",
+      "version": 1277,
+      "balances": [
+        "999999999941",
+        "1000000000059"
+      ],
+      "appDataHash": "0xfd04000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x3952f2c4ed8018837be006a03bb91bdae770810ad6df42f8482226b701edef4e",
+      "signatures": [
+        "0xf72edace7b5071a3f90736cdf82cce10977ec16c532832fd1329dd6e2111f05f3d3781693d8ed2a01fad4cc88d3bd48d11fc1b3a309be6ffe32b8db06a1451ba1c",
+        "0x40cebaf8c676ada1cab58e4b28d5904188c9de5c1b85b59a4b26802d12074c150e438f442ad93be9a90f0729101396796655adff6a13e889a16c8f53ed92f1c21b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0xc007D01420B00123c4931385AD951F9836fD1B6c",
+          "0x444c4cE605D5195868B15A6305d2dd0dfc8B0c0A"
+        ],
+        "signers": [
+          "0xc007D01420B00123c4931385AD951F9836fD1B6c",
+          "0x444c4cE605D5195868B15A6305d2dd0dfc8B0c0A"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x001f000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x2a52a5983a4ba9a6cf9b40327f9abd102f9b069a83b0b0adbea7b5c40449a212",
+      "version": 239,
+      "balances": [
+        "999999999995",
+        "1000000000005"
+      ],
+      "appDataHash": "0xef00000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0xc513d5aab8349eda773776d0ad3a9362ddbe91bef62948c66b571254dd1621e5",
+      "signatures": [
+        "0x4554a3efae293b85d61e7da320af000128397e05fcdb9337e636e71b7047c6f01b7543f36b1ab90d1df78439e0e393546fa6426ab1d6d06207c08e44de46ef741b",
+        "0xac06cbaf5766bd22fd7c682932476aeb96250a922077968858b170550bdc536f7b19095a7f2e400f8ff8e858f19f2d84fdccf9fca28b4fccdafcee2491dd87a51b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x060523bb98AB4300D2623A84E7e990696Fc02e1b",
+          "0x905a6d2d53E2c4Cf85bB1db933483747c8B9B64c"
+        ],
+        "signers": [
+          "0x060523bb98AB4300D2623A84E7e990696Fc02e1b",
+          "0x905a6d2d53E2c4Cf85bB1db933483747c8B9B64c"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0144000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x39739a146df3fd38612d0fd5bb7b4de2e25ba18ba7b82876300d8f4384d10a65",
+      "version": 30,
+      "balances": [
+        "999999999998",
+        "1000000000002"
+      ],
+      "appDataHash": "0x1e00000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0xa03ba7cad6152e89d83cb2f9e62d6e83f5982fef1584e0b706a16d0de4fe64f8",
+      "signatures": [
+        "0x1df061dc1e8d3f1e88e98fc614dac41d67ba974214245f2dbb6502cb9f61225963d8bb4622788b33870cbbab8b11234e989546db52f1a47c6fe95fbf529dceed1c",
+        "0x738e115f2a804f7c4368190352b98ec74b29f35d8e321059fc21de47a0f82a13213354b8e3d526d06e5d9bad4114084be011c681738952d3c4683eb5bee3d97b1b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0xE7Fcf3fdC4A9350049997DF443f74bbA0cA005Cd",
+          "0xCe22D62161fC838a6639ecDfe794C95A2785397E"
+        ],
+        "signers": [
+          "0xE7Fcf3fdC4A9350049997DF443f74bbA0cA005Cd",
+          "0xCe22D62161fC838a6639ecDfe794C95A2785397E"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x03ba000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x3d86eb08cfac8e5601f59090c8a747ef0ea06c2dc04bc3c56b79b82b22ab9170",
+      "version": 2466,
+      "balances": [
+        "999999999996",
+        "1000000000004"
+      ],
+      "appDataHash": "0xa209000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x4c8cad64ba0be6ab3bc8071f40c13b00ad3babf82b52cccbf74d0bdcf96a7ec1",
+      "signatures": [
+        "0x579f9a43c1079ee0eac7a2ba1388195330de9b50926a3ab516010f3c34926fde6dbe09636dc2a734b41b487dde19c78d87335a94501861045c3e94920166ebc61c",
+        "0x52f5f7ae8cafe551cef519dc62758354a6fca8fb6826517707c4d30de6faeb0e554b7ff593ab3a049144e8a831dc4c18684147b07085569eeaaeca9fcb7746bf1c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x162AA729A3b5a1BC2893831754013A3fAf1f5046",
+          "0x77B8fe21b21727AD6b1AA9B2566b491fff67F1b9"
+        ],
+        "signers": [
+          "0x162AA729A3b5a1BC2893831754013A3fAf1f5046",
+          "0x77B8fe21b21727AD6b1AA9B2566b491fff67F1b9"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0180000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x43520e9a624fde49bb261dac4a6859717faf75845b7ca6bbe02c314f70a17d0d",
+      "version": 3170,
+      "balances": [
+        "999999999978",
+        "1000000000022"
+      ],
+      "appDataHash": "0x620c000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x41edabf1622f6c12cb89c4db5934918e6f4b0c67475a18b66a3c7ab9dd7e6fde",
+      "signatures": [
+        "0x87a575d2b6ba907d6a8ca7d2bc4cfb15c21fab485d11d442b583e16c01444acd350d84f20db98d34b9feb5c426c1c64313d8d370c9841158b67fe9e4d0be7ccd1b",
+        "0x8c39cedde095f6051436767bb21fcb9f4fd070e4f2ff047f45b46fcfbe39832a37e4dcca2dddbe943be884383507788f6c8a597231cd6faa8f8f97ddd50ed6701b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x0cfe2B96287a78e538032476f2d3E53103d38CD3",
+          "0x648b6Fc8f5979E6C52F1dD5B75585B6716B70797"
+        ],
+        "signers": [
+          "0x0cfe2B96287a78e538032476f2d3E53103d38CD3",
+          "0x648b6Fc8f5979E6C52F1dD5B75585B6716B70797"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0197000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x4a11bc842031770da2d2b3d91550524eca0fdbb8cc4ddcc15092615680e87391",
+      "version": 1430,
+      "balances": [
+        "999999999962",
+        "1000000000038"
+      ],
+      "appDataHash": "0x9605000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x62e9ef1cc9a7662289a2a8d2293fad2159e19d71a38083c287e2f549e6945730",
+      "signatures": [
+        "0x3e8c491f41f8bf1def210ef3df071c8b3300ee185210679d2d4313fdf31766e83ee94bc62d93d9481ed44ae6a931aed885374721c3074e2845dd40e5c5d4feb21b",
+        "0x9e572303cb253abb93ca16aeaa6264b6550e8ef398a340f3c89b77a80532d9ed162dda09396df2d32ab99df37c516b39ebb0a9085e51a0bc14fd865a871148731c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x7d7B0Ba8387257533aa3d7e6a27c37437990D31c",
+          "0x690Edb7a2ef0D4b50084c9124cce96C4341f38b6"
+        ],
+        "signers": [
+          "0x7d7B0Ba8387257533aa3d7e6a27c37437990D31c",
+          "0x690Edb7a2ef0D4b50084c9124cce96C4341f38b6"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x00e7000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x4c39a4377a952a2eaedb635504bc59eda0d06e2296dda469996e0b1b0a10c299",
+      "version": 3062,
+      "balances": [
+        "999999999990",
+        "1000000000010"
+      ],
+      "appDataHash": "0xf60b000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x6d787568633b7aa3dbd737fe4f02e449f2fd9de8f904234f7fa04880083e8737",
+      "signatures": [
+        "0xef4fe6f4d0a8f3f35dac54dbba0af8073e2e33e451a0abffba73ca43dce06c415c9405f82706b6643d0546ade75031700a1065ee85c98095281869d05a4093151c",
+        "0xd04365df8caf497bd5c44c59b881180941569d4671c6ee43a468a955917b783b301a900123e6475ba36d0277809a6068fbe720ae3a2c3e911459af0fa6b0fd331c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x9859cc58d9F4f7d0Ca8e13A68886182dC71723c6",
+          "0x49A1c873d24Bfb6db704E14fc1e796717595837C"
+        ],
+        "signers": [
+          "0x9859cc58d9F4f7d0Ca8e13A68886182dC71723c6",
+          "0x49A1c873d24Bfb6db704E14fc1e796717595837C"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0141000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x5384c07bc51f6faf090e9445200a79cb00ca16024982b5f42c0769b4f9e8ab12",
+      "version": 338,
+      "balances": [
+        "1000000000014",
+        "999999999986"
+      ],
+      "appDataHash": "0x5201000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x44c591dda9d347cb75e97ceab555e64dcc99aebd6b209c4ee9b3bb6529f6c93c",
+      "signatures": [
+        "0x2780f14afab908eafa66731a7284846825ec2ba13f049b69202407b02d8e177f58f1763a21af84e3a2de61461fa6056011c1342050181eb880e3fd5006e1701f1c",
+        "0xf1e47c0c984e685f8d9a4d3162f9f24ee7a4ddc671e6eb71cc1a280b92542866604abed7331d0bc8712ba93d2be4bb3358774f0e47598358c729d7ee60ae49531c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x879C4fc8ec655482486801A54a0f80D49b097828",
+          "0xa5fA8d34cAe5Dbde29A721bE908C106d78f308B1"
+        ],
+        "signers": [
+          "0x879C4fc8ec655482486801A54a0f80D49b097828",
+          "0xa5fA8d34cAe5Dbde29A721bE908C106d78f308B1"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0241000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x563d69991c9f82450e7d53024328b872f06e2e41f3ab35ab77f0599770fea1e3",
+      "version": 3169,
+      "balances": [
+        "1000000000039",
+        "999999999961"
+      ],
+      "appDataHash": "0x610c000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x82d313904e02118e303b4076c1df15d2f26aa4ee60719a207a0e27baed2edbbc",
+      "signatures": [
+        "0x2333653fdfd522aef1faa977b85d302c1ab22808fe06abc7287c7a77461a7aeb060720f5772ebcc06322212055f2db3be10a0616985881fd5621ef2d484746991c",
+        "0x1a261af13a7065dc36a3fb2a2e43540c7767f8f6652c0c607314eb7969d173e747780b61056fade451f321b11509bf03a4b1ad352c15ba4e9113b93d811993b31c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x09202004C50967efe299E22aCa9A088429C054a1",
+          "0x3CEce39292B4AcAD06bD8378De24Cb4D80Dc46A6"
+        ],
+        "signers": [
+          "0x09202004C50967efe299E22aCa9A088429C054a1",
+          "0x3CEce39292B4AcAD06bD8378De24Cb4D80Dc46A6"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0339000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x65de596388186bfd7f23cc6966c09d45171423a6b34858838c372b07e378f44c",
+      "version": 2475,
+      "balances": [
+        "1000000000005",
+        "999999999995"
+      ],
+      "appDataHash": "0xab09000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0xda263df239b070d0ab17737e0ebb47815ee9fc110ad5c5c1783f41de370af174",
+      "signatures": [
+        "0x935e94e791dae0ff6ae8c17ef2e334f6ca8e55dcd760327223b0fe3df6ad8d6c59084005839a672dc103944ac097b4b1b19d4828aa2d6218f77cbb5b5e589ee81b",
+        "0x86028e4e67aef5f206b6f9d7f90c732a12ce4ab837601f2ec5aea989a8ab2aff7496fabe2fa1d2e5499cbc71e0898058a6c528172217925a6a9123d9cc78522f1c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x48a32F82024FeD30B65f5304476b64Bb9D31ddF5",
+          "0x41084B0d078A4a091C32f14c8ffA05DFbB171059"
+        ],
+        "signers": [
+          "0x48a32F82024FeD30B65f5304476b64Bb9D31ddF5",
+          "0x41084B0d078A4a091C32f14c8ffA05DFbB171059"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x023c000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x671da71f4fb19b49099174fc71f71917b4cded52d42104d28a28584e86cfd829",
+      "version": 1058,
+      "balances": [
+        "999999999958",
+        "1000000000042"
+      ],
+      "appDataHash": "0x2204000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x5e75cac8b201ab5e57d9c59c875562a7d22bf44e53d76693631c3d29383586c6",
+      "signatures": [
+        "0x5443c13992e2e2410d574061b2010c3b3bd13bb85657c1a7f58e1da8078a4f085e1a5b362c67bd72c9b2087c16c65ff7f7b64cc8908942a405bf9de516a48d921b",
+        "0x72fa0fd6bbd5e61d07fcf14429d06b30474872f7868602a09c20f0cd4cc66ea06dbed7484d751a3e17b27437df3a441602f3c38d91a80a54ad7b9af88e444f9c1c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0xb2bb23e93c814A4be37d67499a9dBEA738C6fB4C",
+          "0x7241Cd132F6e2981dc5e3C5474c0519dB2167b31"
+        ],
+        "signers": [
+          "0xb2bb23e93c814A4be37d67499a9dBEA738C6fB4C",
+          "0x7241Cd132F6e2981dc5e3C5474c0519dB2167b31"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0368000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x6a348c16ab47f899dbfaaffec91129b7e699467d158089e6a1b50f70b9854c7a",
+      "version": 868,
+      "balances": [
+        "999999999972",
+        "1000000000028"
+      ],
+      "appDataHash": "0x6403000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x675e4f49ed288d57710e1d6efe7b29f250de5e9cc35a1009a7d4e41d621d2c25",
+      "signatures": [
+        "0xb402f56997eaae891dbcec746c188997a3b9ac6011c8e855d2a206538986fdb248a4308b8a0bd2fc22f7ba5fa01f220383b91dc6e62da4f0bf1f0c8481f1b9221c",
+        "0xa5cb0efd9dacabba6de62f912ae60e1e0fe41484749e1155426b56b769842c7d7fff0650576ecf06751190970de536b14eaadb4446930ad2415e437b9ee268491b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x41E391CE4cE018E417841C2811fDc21d1Aa6784F",
+          "0x4F3C2720a4D619e5F446f4BE4e9cdDaE9b160125"
+        ],
+        "signers": [
+          "0x41E391CE4cE018E417841C2811fDc21d1Aa6784F",
+          "0x4F3C2720a4D619e5F446f4BE4e9cdDaE9b160125"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0247000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x737b8103d14d936ba95cd8bf58544061244f3ab613f752007d9c8a2d46ad9dce",
+      "version": 1032,
+      "balances": [
+        "1000000000066",
+        "999999999934"
+      ],
+      "appDataHash": "0x0804000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0xb0008123312537ab01f4b6a3f116d2ab54ff0e9164dcecd2d3f92eb2be0ecb9b",
+      "signatures": [
+        "0x9c9e869bb947075cf6a41b7cf61a02662ce0e83f741d276a2974c89812044d7a7dbab8d75e2f8c1a91fa7f766f8f297a349b8cba6a853df53471bc0e04da04ec1b",
+        "0xbbd4a45158012c5f3d5f98ad87c26cb8b54f2062620e0d4f3c00ed143b797d851ade54d14ed013abf39c6b3ff5b89b561605472f3b05d083dbf2f38953de723d1c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0xa79B8B46AfD4Bfd85C6848A686415D84cE53b82B",
+          "0x392533Fc06413F910618Cc60116E9674E0a2a3A4"
+        ],
+        "signers": [
+          "0xa79B8B46AfD4Bfd85C6848A686415D84cE53b82B",
+          "0x392533Fc06413F910618Cc60116E9674E0a2a3A4"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x00a1000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x7574a7ebace2343d1a4774d4a3e10b1bf2af315fbfb4979bf31a28f9b6fdaaa5",
+      "version": 1595,
+      "balances": [
+        "1000000000015",
+        "999999999985"
+      ],
+      "appDataHash": "0x3b06000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x345a572b41d54d32490eae9c3e7c681a7a1d67b18649c4e53324f0c25fe3bc4c",
+      "signatures": [
+        "0xd7812589991f66694128cb64ebd787acfd7d7e56baf04a2d4c96a7f86726ff7a5dafca72343502bb20d0bd07ff6a2288eabd7e6190c7895bbbcc75a18ad98cd11b",
+        "0xb193d0395f1a045d081f797b9b53d7603111db09207de6c9601114e0c173b6ac651c1712e6005f49d01f7559719e028827ddee61b2cd7fbd8a9fffd42d6387e61b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x9D50E5f45092BDffd4930C3Ddc892bf79fa63ec0",
+          "0xB667C3Ae39301D737fc6dF52D84F172F36aD56CC"
+        ],
+        "signers": [
+          "0x9D50E5f45092BDffd4930C3Ddc892bf79fa63ec0",
+          "0xB667C3Ae39301D737fc6dF52D84F172F36aD56CC"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x00fc000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x779c10acf5557b75adad21cd15d7b4591a785b7422d152984de59eef205b92c2",
+      "version": 318,
+      "balances": [
+        "1000000000010",
+        "999999999990"
+      ],
+      "appDataHash": "0x3e01000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x45add54609bbf65c36f1b66db07fa4054cb6e66460eda61fd3e84de1ec0a05ca",
+      "signatures": [
+        "0xe7446537a479b90fe93e115fb126b608db2f381e5d1a7e7cf15b4403c2615c482bdabf29d5d52ed93afeb0f3bcfab079e8b37ac4024c64ab30af28dc12d952bb1c",
+        "0x332a1305d75188d281e6404747ea15a796abcccac5a5135fb1db0bd483ea5d257a30e777979e691cae39ada0bb7f2efe69152dacacf704acf1a125422b278e801c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0xe6DF43baf8B62BFdd260bfd82541955F46fdC92d",
+          "0x7E340cab6fdad1131cB9f1c970943A277e8E2e8c"
+        ],
+        "signers": [
+          "0xe6DF43baf8B62BFdd260bfd82541955F46fdC92d",
+          "0x7E340cab6fdad1131cB9f1c970943A277e8E2e8c"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x026e000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0x7b6bae333509908a627072f442d9ed931f52bf6f0d754760d50275f9788bc1f6",
+      "version": 902,
+      "balances": [
+        "999999999990",
+        "1000000000010"
+      ],
+      "appDataHash": "0x8603000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x7acb219b4c0ef91967570984e3d643117a49c4f2217d02d77a0a9263825e7993",
+      "signatures": [
+        "0x7441d92d91259051595d68da795e97a4da04dc6072d3fd3e96560689b16d1326483b9ef35ef550f7bf84fcd162713d18ab8c3e9f141a064b6c581a6edc0b35721c",
+        "0xc17433e1cf6b9372bbec438832a8aed9529ce6a7a5721b4a8eb43b390ca195ba6d542d2767a5d5cbab5bd7d68a11b006b69011562a0ad9f8ea23cbbba4de3f691b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0xd2B8D6ABA43D3cEE9691F1FF85a89541E298Fc0f",
+          "0x31e3D3F8493d283b0D5Ff50C09cF36Eb127bcbAb"
+        ],
+        "signers": [
+          "0xd2B8D6ABA43D3cEE9691F1FF85a89541E298Fc0f",
+          "0x31e3D3F8493d283b0D5Ff50C09cF36Eb127bcbAb"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x03b4000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xa500aed089a4c246e81a92e3f5e583517566236badec4b1020bc40ee9d8d1803",
+      "version": 371,
+      "balances": [
+        "1000000000037",
+        "999999999963"
+      ],
+      "appDataHash": "0x7301000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x99de5b01e3de32a4023b05eda8db0771686fa818672dca7a609c5a4b2a099230",
+      "signatures": [
+        "0x512516991b6bb2ffe2546d5aa46dbc894156cf2bfc7d0fd793f306c9091cb7264a90e925b518d26d60d8191dda3e279a6cef1ef716a7448a0e74d0e5780ee65d1b",
+        "0x6b05e916f5819d0c2e8e6139ed5bd6e1dbabd75b091d67a905a41e9116f97a391ab97b300f389e153695cc2fcf4e0b9c17adebf945b3fe56134d2d3728602f9e1c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x79c384a6113FFa031bbefe5c76c8558824FAB945",
+          "0x94ef8FAaC332944b43F1D0411D54f3A465488612"
+        ],
+        "signers": [
+          "0x79c384a6113FFa031bbefe5c76c8558824FAB945",
+          "0x94ef8FAaC332944b43F1D0411D54f3A465488612"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x00be000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xac6589745744cbe3ff0a0b8de9f2590e2a6edcfddfd4d94b303a26c211bef824",
+      "version": 68,
+      "balances": [
+        "1000000000008",
+        "999999999992"
+      ],
+      "appDataHash": "0x4400000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0xd9acac58c56ebfab535e0203c06bf89f0dfdd8ee9ed8a6de5bbbe0e4f914459d",
+      "signatures": [
+        "0xcb5dfbaa887b270ceeaa0031f084ac47c6f3402d802b07734a4ca7b789e0d6e649b982e88b8643f677a0e4ecaf5867fde3a7f297ad939b930ff6c90d1ce776261b",
+        "0x373b261a55aa074a6cff9e31e56872de55fd61f1a61adea341e33100e19543e74fa8036fedcd07b016e8b7607974ba90882f099675481bb4d4e69ad6413f19e91c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x890204Ff43f1B1996f73455C1b42970fc0d7e558",
+          "0xc7A2eA04A71486e2C1aD5F7a0a3df7162cD1c579"
+        ],
+        "signers": [
+          "0x890204Ff43f1B1996f73455C1b42970fc0d7e558",
+          "0xc7A2eA04A71486e2C1aD5F7a0a3df7162cD1c579"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0250000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xb592b2a396e3488007ce49b515ebb927e5407ffbf7b8ab608b319dc3f29aff90",
+      "version": 1633,
+      "balances": [
+        "999999999979",
+        "1000000000021"
+      ],
+      "appDataHash": "0x6106000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0xdb1b623ed9657383bf79eeb4d12fcf370a9c096791d72edb8305bf7b6c458815",
+      "signatures": [
+        "0xb3dd3deeeaf841e3012b24cfb9a87c1e95fc5538d329834d141002d3de75629c00a69c926222e126c4db8c64b2ebcfc9b61115d7219e022141ac4b2164a6ce711b",
+        "0xf87aefdd15319cf1a84d25a7160f5de95fa830c57308ed5f11f4beb025d408d55eee0343b569dae19104da7830ebcf5cd6c52a1dfa20fbd1c1cef6f0008567161b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0xf54BfF62584a22072BcA901Eda3D8E97a95a3B56",
+          "0xc4e0F9ED53dd623e1Ad3Df90204Ba094e5076D5E"
+        ],
+        "signers": [
+          "0xf54BfF62584a22072BcA901Eda3D8E97a95a3B56",
+          "0xc4e0F9ED53dd623e1Ad3Df90204Ba094e5076D5E"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0258000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xb68010c9d9bc63f30786abdc881c8b3c49c563c47327ecc213278527f73546fb",
+      "version": 144,
+      "balances": [
+        "1000000000002",
+        "999999999998"
+      ],
+      "appDataHash": "0x9000000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x472f9e58ccf7562502c81f97dcae4641ee524da8c584af3c799f5a6d4cbfdc14",
+      "signatures": [
+        "0xae33fe9814453969a5eb955ad109c1eda13b6bd0e7fe133d6214c96aa7e92fe516081ba7c9a4847447b0e42d37434fe0ae1323952daa974f127134aa3a21d6bc1b",
+        "0x04d1f96447f02943227f924936e5e5591e5022972808501a3e7013fdd626bd0a67ada12a1a016862509717b7c5cfda8958232527aa17dc181a916283f866e9b01c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0xbC8E869a48d48eB35421D58Ea724FD612dD06287",
+          "0x90509cafc965a372372E27E4a8a5E6374b38E703"
+        ],
+        "signers": [
+          "0xbC8E869a48d48eB35421D58Ea724FD612dD06287",
+          "0x90509cafc965a372372E27E4a8a5E6374b38E703"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x02b3000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xcb7899ea15b8920c3f6b727e85c2c18f7cfeaa58509f29daa3db0fb3f7adb7d8",
+      "version": 2706,
+      "balances": [
+        "999999999932",
+        "1000000000068"
+      ],
+      "appDataHash": "0x920a000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x77551980465f5a4f8cc15c9b90aa7fa804089bf3a2a5d620ff68a41afba95a41",
+      "signatures": [
+        "0x87dcfc418993fcf54ba54b9e3e1d73ac612e71ba231e616a0a3b859ebb6b6bb75129f2fa452876b1530654cc66d197c46bb152c21e2671d1b67df8b7435927e01c",
+        "0x5374aba96c464e7724d420cd1701ac55b476fe60a90d055c02e48f1cfa21d435603768b37621710546da1ba85cd409c03175cdfbc5030a4dd521749e77baf6891b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x761388DBC03c360782f6a7a8E25646785b4c12b1",
+          "0x392046c99F85B8263201166096B3833226Ae7FA0"
+        ],
+        "signers": [
+          "0x761388DBC03c360782f6a7a8E25646785b4c12b1",
+          "0x392046c99F85B8263201166096B3833226Ae7FA0"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0314000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xdfbc73223ee21d082a99759a327cb96c44bf0562380e2bbaf88e5d9a934767e0",
+      "version": 806,
+      "balances": [
+        "1000000000014",
+        "999999999986"
+      ],
+      "appDataHash": "0x2603000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0xac2bffc17df393841c89988af9e3956ef4594291a8932f16b51bafaffaeb6191",
+      "signatures": [
+        "0xdbf5c49cb0d76788aa789df503a5132d22975fcfd12430b7f614e5bcf8da7769278f4ff0fdba8d57609e21b9a8ca1da6dac77ec3973cad083859fcf2c5d25c521c",
+        "0xc313119c0d5678c708e88a1f97023d3b54370438f8787b92e0fb181b1a5efa00421172a635b20667805c426a0934bd06e7e77cff8f6a1d5fcb65928a50fe0a471c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0xF9eC5F3a85efB869b7AEb016657600F7f4D2aFE2",
+          "0x567843dA483fd1Dc8Bf32aB425fEb14E093f899E"
+        ],
+        "signers": [
+          "0xF9eC5F3a85efB869b7AEb016657600F7f4D2aFE2",
+          "0x567843dA483fd1Dc8Bf32aB425fEb14E093f899E"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x01e3000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xdff1898d65ba5eec4b17f0c920f92b648488b8f7619bdee311ccdfd3cdce4ae4",
+      "version": 2877,
+      "balances": [
+        "999999999993",
+        "1000000000007"
+      ],
+      "appDataHash": "0x3d0b000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x2b04679cfb92b8524c16b20fb9618b230a0036261788027dfd1d5328d01ceb95",
+      "signatures": [
+        "0x5eb764e6f861292e585e1c030e14dc07449810faf2e933996029585ba3732daf1dfecfa39e80e76ec963a1f1ce288dde5771cf1ccdd9c24757d38698bedd23581b",
+        "0x9a0c705943a8eb7a215680784ee9b2cfb92cd91ecfd93a46c2dbdfa9687e688e6262fb2d50db84e67fb71d4f8bdfde09715a06fdc6359a78a59429f4b53d72d91b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x62593C3E64B384E75Ca106A063eb1A8582b8C2B1",
+          "0x5FC8135BdfB321FD976aDb283e42BfE4Bb96a787"
+        ],
+        "signers": [
+          "0x62593C3E64B384E75Ca106A063eb1A8582b8C2B1",
+          "0x5FC8135BdfB321FD976aDb283e42BfE4Bb96a787"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0341000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xe710e7a3cb1cb8c08963071d606bdd61c08b6d4fa6a45133687fbb71109e1c6c",
+      "version": 2934,
+      "balances": [
+        "1000000000034",
+        "999999999966"
+      ],
+      "appDataHash": "0x760b000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x7d71cb9480a97fc9d70f75ed319e53df390dcf1d342b02fb862e152c62b1d16f",
+      "signatures": [
+        "0x2341fb40531888ade8f520b0f084f46f4ba561705d405de08e1b7d8c7e9592121f53ae12ec62d5d76888eb55c3724a6428cf6acf54b3dc132a1b88e9f52689861b",
+        "0xb8ffd3a2911a95ee8dd5541f25a8be508784a5691a3561ebc566a8f0940c589e621f575f1c4eaa1a2f0cb32952e07d0370a6cafa45a4911bdbdc05c81e4ff38b1b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x084C63a54a08B77C5069ef6dEB02A540d0b42f30",
+          "0x148b17Ce6739d67D0477299b86521950c889F181"
+        ],
+        "signers": [
+          "0x084C63a54a08B77C5069ef6dEB02A540d0b42f30",
+          "0x148b17Ce6739d67D0477299b86521950c889F181"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0097000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xe993a7a20a6925112f20f987832413b0d928e26a25248bfca040d8b3718831c0",
+      "version": 18,
+      "balances": [
+        "1000000000004",
+        "999999999996"
+      ],
+      "appDataHash": "0x1200000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x1a7096e176510cf9b406fb2ce478acc6f70c2bb70dd1f5bb16ca0906fc245a6c",
+      "signatures": [
+        "0xe4920d2994a2857cc1e9f624a6e486da2a3a1d7394282313327d32d9ea997032647c199e52826407b1b6a9a75787ba189eb35225c8aa4a9af60c7ec42a2b04931c",
+        "0x869aa62a96acae9123026d85f68cb8c1e0be2f71678e20021dcccc650f5d975e1431ec93d98e75bc92b25ee67dcb6a209032787ae7d0bfcfd7c797a0804652731c"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x2ba1b28CFF59Efc52204a994C2a779988BcB6dD5",
+          "0x582d644de64F65e8B5bb9619465CD11bBF92C7a0"
+        ],
+        "signers": [
+          "0x2ba1b28CFF59Efc52204a994C2a779988BcB6dD5",
+          "0x582d644de64F65e8B5bb9619465CD11bBF92C7a0"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x0063000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xf67911424dee3de79fd1dcac61b39f975ff7876b5d572be88843055fb3c29d83",
+      "version": 2682,
+      "balances": [
+        "1000000000086",
+        "999999999914"
+      ],
+      "appDataHash": "0x7a0a000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x08624b5ee5c74bfe0148f567b2ef9b694e550d3f91ef3791b0a15bf6f1590705",
+      "signatures": [
+        "0x5d7a30bb348af31d0ceb7e41a95038bd3fa2f6d4e401687a2647063e303abc5b0a9b3a68ca137e32d726f1fc9e0a0d36e8832f745b7d5ee6f9e9f92785c5419f1c",
+        "0x8a9f2ebb97f586025e6b83aa5e7da6d7f260d5a68c3680362f368f6a75d6c4154153b47bc5688efa9cdd6122feca0c6b5df8c9db071e98d60e0c8222b00895d91b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x51fb36454FC80C7820B231646687d2c1fAecC1F5",
+          "0x3C70CDE26D6f7157663D28Ef983de8fE8EBA7f99"
+        ],
+        "signers": [
+          "0x51fb36454FC80C7820B231646687d2c1fAecC1F5",
+          "0x3C70CDE26D6f7157663D28Ef983de8fE8EBA7f99"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x01ca000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xfad8b493ca0cb205fe9bc5b5eecaa0f16c1b7de60eeb1c312f26b13eb107e919",
+      "version": 256,
+      "balances": [
+        "1000000000010",
+        "999999999990"
+      ],
+      "appDataHash": "0x0001000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0x5801924e38c3e7b270be60900640ccb3a30bddc971061a6cbe76fa9516d0ed17",
+      "signatures": [
+        "0xd0bc195b505c6ade7825982475537398e7f8aac84e790d5661a070fd930acdda32b793f06ede347902f63d17ff1dd69173a8ad099b22726d9033708b7bcfe4b81c",
+        "0x095cb7170ca3d27c3f63e9cea94899793ce05a4824427b0104221fcd27de28c320f593f3be5b5468063e709b71b6f3e49ff1e5e582eb77dfe4da160979baebb11b"
+      ]
+    },
+    {
+      "params": {
+        "participants": [
+          "0x0443E33185Ed40c89Bd080d336D343FA5d4B5E2B",
+          "0x6F2Cc1a9081d8f5e764F6E108616fdaa62bA62B2"
+        ],
+        "signers": [
+          "0x0443E33185Ed40c89Bd080d336D343FA5d4B5E2B",
+          "0x6F2Cc1a9081d8f5e764F6E108616fdaa62bA62B2"
+        ],
+        "assets": [
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "initialDeposits": [
+          "1000000000000",
+          "1000000000000"
+        ],
+        "challengePeriod": 3600,
+        "fundingDeadline": 4102444800,
+        "salt": "0x02f3000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sphereId": "0xfb20e62a7be94fd2b40c5b57bfe272cfe6003f017987081fcdc2b4c722880a6a",
+      "version": 2734,
+      "balances": [
+        "1000000000008",
+        "999999999992"
+      ],
+      "appDataHash": "0xae0a000000000000000000000000000000000000000000000000000000000000",
+      "isFinal": false,
+      "digest": "0xf4b55cad2b57466d8f05fa4b74b749b4175c1aec44924ea894578e095b8a729e",
+      "signatures": [
+        "0x7f2d23f0491085f9294bdd0957917263ec4edea7435a2cc1ac2c2215dda43ade7061a6527fcea3fa328ee4e40e7708efd981c153fc78a2aa707fdaa09a25d8921c",
+        "0xb5a8a7d23985d505ad1f29530449c6b4fbf4165aa9bdf4353114050b9ce640bf7bf91573bf36fdf0db1d041f6dd645503ba6fa7f0a851eb89dd520ed9e8eb3241b"
+      ]
+    }
+  ],
+  "startedAt": "2026-10-07T10:40:08.528301Z"
+}

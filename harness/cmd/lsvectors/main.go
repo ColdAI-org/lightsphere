@@ -14,7 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/shayansal/lightsphere/harness/state"
+	"github.com/ColdAI-org/lightsphere/harness/state"
 )
 
 type jsonState struct {
@@ -32,6 +32,8 @@ type vectors struct {
 	VerifyingContract string      `json:"verifyingContract"`
 	DomainSeparator   string      `json:"domainSeparator"`
 	Participants      []string    `json:"participants"`
+	Signers           []string    `json:"signers"`
+	JoinSignatures    []string    `json:"joinSignatures"`
 	PrivateKeys       []string    `json:"privateKeys"`
 	Assets            []string    `json:"assets"`
 	InitialDeposits   []string    `json:"initialDeposits"`
@@ -76,7 +78,9 @@ func main() {
 		privs[i] = pk
 		addr := crypto.PubkeyToAddress(pk.PublicKey)
 		p.Participants = append(p.Participants, addr)
+		p.Signers = append(p.Signers, addr)
 		v.Participants = append(v.Participants, addr.Hex())
+		v.Signers = append(v.Signers, addr.Hex())
 	}
 	for _, a := range p.Assets {
 		v.Assets = append(v.Assets, a.Hex())
@@ -89,6 +93,13 @@ func main() {
 		panic(err)
 	}
 	v.SphereID = hx(sid[:])
+	for i, k := range privs {
+		sig, err := state.SignECDSA(k, dom.JoinDigest(sid, p.Participants[i]))
+		if err != nil {
+			panic(err)
+		}
+		v.JoinSignatures = append(v.JoinSignatures, hx(sig))
+	}
 
 	bal := []*big.Int{big.NewInt(10e8), big.NewInt(100), big.NewInt(5e8), big.NewInt(50)}
 	for _, step := range []struct {

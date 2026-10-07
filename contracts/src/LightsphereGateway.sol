@@ -15,7 +15,7 @@ import {IClprApplication, IClprServiceSend, CLPR_REPLY_SUCCESS} from "./interfac
 ///      lies on the path of a real leaf. Every leaf change emits LeafUpdated so any indexer can rebuild the
 ///      tree, and the proofs, for any checkpoint.
 contract LightsphereGateway is IClprApplication {
-    uint256 public constant TREE_DEPTH = 20;
+    uint256 public constant TREE_DEPTH = 32;
 
     address public immutable clprService;
     bytes32 public immutable channelId;
@@ -36,7 +36,7 @@ contract LightsphereGateway is IClprApplication {
         uint256 balance;
         uint256 cumDepositsApplied;
         uint256 cumWithdrawalsInitiated;
-        uint32 index; // 1-based leaf position, 0 = no leaf yet
+        uint64 index; // 1-based leaf position, 0 = no leaf yet
     }
 
     struct PendingWithdrawal {
@@ -46,14 +46,14 @@ contract LightsphereGateway is IClprApplication {
     }
 
     mapping(bytes32 => Account) internal _accounts; // keccak256(abi.encode(account, asset))
-    uint32 public leafCount;
+    uint64 public leafCount;
     mapping(uint256 => mapping(uint256 => bytes32)) internal _nodes; // level => position => hash
     mapping(uint64 => PendingWithdrawal) internal _pending; // CLPR messageId => withdrawal
 
     event LeafUpdated(
         address indexed account,
         address indexed asset,
-        uint32 index,
+        uint64 index,
         uint256 balance,
         uint256 cumDepositsApplied,
         uint256 cumWithdrawalsInitiated
@@ -61,9 +61,16 @@ contract LightsphereGateway is IClprApplication {
     event DepositApplied(uint64 depositId, address indexed recipient, address indexed asset, uint256 amount);
     event Transfer(address indexed from, address indexed to, address indexed asset, uint256 amount);
     event WithdrawalSent(
-        uint64 withdrawalId, uint64 epoch, address indexed account, address indexed asset, uint256 amount, address recipient
+        uint64 withdrawalId,
+        uint64 epoch,
+        address indexed account,
+        address indexed asset,
+        uint256 amount,
+        address recipient
     );
-    event WithdrawalRefunded(uint64 withdrawalMessageId, address indexed account, address indexed asset, uint256 amount);
+    event WithdrawalRefunded(
+        uint64 withdrawalMessageId, address indexed account, address indexed asset, uint256 amount
+    );
     event CheckpointSent(uint64 epoch, bytes32 root, uint64 lastAppliedDepositId);
 
     error Unauthorized();
@@ -74,6 +81,7 @@ contract LightsphereGateway is IClprApplication {
     error InsufficientBalance();
     error TooEarly();
     error TreeFull();
+    error InvalidAmountOrRecipient();
 
     constructor(
         address clprService_,
@@ -145,6 +153,7 @@ contract LightsphereGateway is IClprApplication {
 
     function transfer(address asset, address to, uint256 amount) external {
         if (!isAsset[asset]) revert UnknownAsset();
+        if (amount == 0 || to == address(0)) revert InvalidAmountOrRecipient();
         Account storage from = _accounts[_key(msg.sender, asset)];
         if (from.balance < amount) revert InsufficientBalance();
         from.balance -= amount;
@@ -161,7 +170,8 @@ contract LightsphereGateway is IClprApplication {
         if (!isAsset[asset]) revert UnknownAsset();
         if (sphereId == bytes32(0)) revert NotInitialized();
         Account storage a = _accounts[_key(msg.sender, asset)];
-        if (amount == 0 || a.balance < amount) revert InsufficientBalance();
+        if (amount == 0 || recipient == address(0)) revert InvalidAmountOrRecipient();
+        if (a.balance < amount) revert InsufficientBalance();
         a.balance -= amount;
         a.cumWithdrawalsInitiated += amount;
         _updateLeaf(msg.sender, asset, a);
@@ -181,8 +191,7 @@ contract LightsphereGateway is IClprApplication {
         if (sphereId == bytes32(0)) revert NotInitialized();
         if (block.timestamp < uint256(lastCheckpointAt) + checkpointInterval) revert TooEarly();
         bytes32 root = _nodes[TREE_DEPTH][0];
-        bytes memory payload =
-            abi.encode(T.MSG_CHECKPOINT, sphereId, abi.encode(epoch, root, lastAppliedDepositId));
+        bytes memory payload = abi.encode(T.MSG_CHECKPOINT, sphereId, abi.encode(epoch, root, lastAppliedDepositId));
         IClprServiceSend(clprService).sendMessage(channelId, connectorId, abi.encodePacked(anchor), payload);
         emit CheckpointSent(epoch, root, lastAppliedDepositId);
         lastCheckpointAt = uint64(block.timestamp);
@@ -193,7 +202,7 @@ contract LightsphereGateway is IClprApplication {
 
     function _updateLeaf(address account, address asset, Account storage a) internal {
         if (a.index == 0) {
-            if (leafCount == uint32(1 << TREE_DEPTH)) revert TreeFull();
+            if (leafCount == uint64(1) << TREE_DEPTH) revert TreeFull();
             a.index = ++leafCount;
         }
         bytes32 h = T.leafHash(account, asset, a.balance, a.cumDepositsApplied, a.cumWithdrawalsInitiated);
@@ -225,7 +234,7 @@ contract LightsphereGateway is IClprApplication {
     /// @notice Proof against the current root. Wallets call this right after each checkpoint (or rebuild it
     ///         from LeafUpdated events) and keep it for a possible exit.
     function proofOf(address who, address asset) external view returns (bytes32[] memory proof) {
-        uint32 index = _accounts[_key(who, asset)].index;
+        uint64 index = _accounts[_key(who, asset)].index;
         if (index == 0) return proof;
         proof = new bytes32[](TREE_DEPTH);
         uint256 pos = index - 1;

@@ -25,6 +25,14 @@ contract MockClprService is IClprServiceSend {
     Item[] internal _outbound;
     uint256 public head;
     bool public failNextDelivery;
+    /// Models CLPR's best-effort response callback not running (for example, out of gas): the response is
+    /// consumed from the queue but the origin application is never told.
+    bool public dropNextResponse;
+    uint256 public droppedFailureResponses;
+
+    function setDropNextResponse(bool v) external {
+        dropNextResponse = v;
+    }
 
     function link(MockClprService peer_, bytes32 channelId_) external {
         peer = peer_;
@@ -81,6 +89,11 @@ contract MockClprService is IClprServiceSend {
 
     function deliverResponse(Item calldata it) external {
         require(msg.sender == address(peer), "peer");
+        if (dropNextResponse) {
+            dropNextResponse = false;
+            if (it.status != 0) ++droppedFailureResponses;
+            return;
+        }
         try IClprApplication(it.app).onClprResponse(channelId, it.messageId, it.status, it.data) {} catch {}
     }
 }
@@ -139,39 +152,6 @@ contract MockHTS {
         if (associated[account][token]) return 194;
         associated[account][token] = true;
         return 22;
-    }
-}
-
-/// @notice Stand-in for the Hedera Account Service system contract at 0x16a. ECDSA signatures recover as on
-///         Hedera, including long-zero aliases mapped to an ECDSA key; ED25519 approvals are registered by tests.
-contract MockHAS {
-    mapping(address => address) public longZeroToEvm;
-    mapping(bytes32 => bool) public ed25519Valid;
-
-    function mapLongZero(address longZero, address evmAddress) external {
-        longZeroToEvm[longZero] = evmAddress;
-    }
-
-    function approveEd25519(address account, bytes32 digest, bytes calldata sig) external {
-        ed25519Valid[keccak256(abi.encode(account, digest, sig))] = true;
-    }
-
-    function isAuthorizedRaw(address account, bytes memory messageHash, bytes memory sig) external view returns (bool) {
-        if (sig.length == 65) {
-            bytes32 r;
-            bytes32 s;
-            uint8 v;
-            assembly {
-                r := mload(add(sig, 32))
-                s := mload(add(sig, 64))
-                v := byte(0, mload(add(sig, 96)))
-            }
-            if (v < 27) v += 27;
-            address rec = ecrecover(bytes32(messageHash), v, r, s);
-            return rec != address(0) && (rec == account || rec == longZeroToEvm[account]);
-        }
-        if (sig.length == 64) return ed25519Valid[keccak256(abi.encode(account, bytes32(messageHash), sig))];
-        return false;
     }
 }
 

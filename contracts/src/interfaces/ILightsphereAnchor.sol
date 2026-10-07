@@ -25,14 +25,14 @@ interface ILightsphereAnchor {
     event Withdrawn(address indexed account, address indexed asset, uint256 amount);
 
     function open(LightsphereTypes.SphereParams calldata params) external returns (bytes32 sphereId);
-    function fund(bytes32 sphereId) external payable;
+    function fund(bytes32 sphereId, bytes calldata joinSig) external payable;
     function reclaimFunding(bytes32 sphereId) external;
     function closeCooperative(LightsphereTypes.SphereState calldata state, bytes[] calldata sigs) external;
     function checkpoint(LightsphereTypes.SphereState calldata state, bytes[] calldata sigs) external;
-    function startClose(bytes32 sphereId, LightsphereTypes.SphereState calldata state, bytes[] calldata sigs)
-        external;
+    function startClose(bytes32 sphereId, LightsphereTypes.SphereState calldata state, bytes[] calldata sigs) external;
     function finalizeClose(bytes32 sphereId) external;
     function withdraw(address asset) external;
+    function withdrawTo(address asset, address to) external;
 
     function status(bytes32 sphereId) external view returns (Status);
     function latestState(bytes32 sphereId) external view returns (uint64 version, bytes32 appDataHash);
@@ -55,7 +55,9 @@ interface ILightsphereNetworkAnchor is ILightsphereAnchor {
         uint256 amount
     );
     event WithdrawalReleased(bytes32 indexed sphereId, uint64 withdrawalId);
-    event CheckpointAccepted(bytes32 indexed sphereId, uint64 sphereEpoch, bytes32 balancesRoot, uint64 lastAppliedDepositId);
+    event CheckpointAccepted(
+        bytes32 indexed sphereId, uint64 sphereEpoch, bytes32 balancesRoot, uint64 lastAppliedDepositId
+    );
     event SphereHalted(bytes32 indexed sphereId, uint64 lastSphereEpoch);
     event Exited(bytes32 indexed sphereId, address indexed account, address indexed asset, uint256 amount);
 

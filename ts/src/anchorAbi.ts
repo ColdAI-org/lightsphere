@@ -190,6 +190,30 @@ export const anchorAbi = [
   },
   {
     "type": "function",
+    "name": "depositRefunded",
+    "inputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "depositToSphere",
     "inputs": [
       {
@@ -396,41 +420,17 @@ export const anchorAbi = [
   },
   {
     "type": "function",
-    "name": "firstSuccessDepositId",
-    "inputs": [
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "fund",
     "inputs": [
       {
         "name": "sphereId",
         "type": "bytes32",
         "internalType": "bytes32"
+      },
+      {
+        "name": "joinSig",
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ],
     "outputs": [],
@@ -456,6 +456,30 @@ export const anchorAbi = [
         "name": "",
         "type": "bool",
         "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "joinDigest",
+    "inputs": [
+      {
+        "name": "sphereId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "participant",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ],
     "stateMutability": "view"
@@ -666,6 +690,11 @@ export const anchorAbi = [
             "internalType": "address[]"
           },
           {
+            "name": "signers",
+            "type": "address[]",
+            "internalType": "address[]"
+          },
+          {
             "name": "assets",
             "type": "address[]",
             "internalType": "address[]"
@@ -706,6 +735,30 @@ export const anchorAbi = [
       }
     ],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "participantsOf",
+    "inputs": [
+      {
+        "name": "sphereId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -859,6 +912,24 @@ export const anchorAbi = [
     "inputs": [
       {
         "name": "asset",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawTo",
+    "inputs": [
+      {
+        "name": "asset",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "to",
         "type": "address",
         "internalType": "address"
       }
@@ -1176,6 +1247,11 @@ export const anchorAbi = [
             "internalType": "address[]"
           },
           {
+            "name": "signers",
+            "type": "address[]",
+            "internalType": "address[]"
+          },
+          {
             "name": "assets",
             "type": "address[]",
             "internalType": "address[]"
@@ -1397,6 +1473,11 @@ export const anchorAbi = [
         "internalType": "address"
       }
     ]
+  },
+  {
+    "type": "error",
+    "name": "BadJoinSignature",
+    "inputs": []
   },
   {
     "type": "error",

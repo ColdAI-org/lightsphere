@@ -4,8 +4,10 @@ import {
   type Hex,
   encodeAbiParameters,
   hashTypedData,
+  hexToBigInt,
   keccak256,
   recoverAddress,
+  slice,
 } from "viem";
 import type { LocalAccount } from "viem/accounts";
 
@@ -25,7 +27,10 @@ export interface SphereState {
 
 export interface SphereParams {
   mode: number;
+  /** Accounts that fund, start a close and receive payouts. */
   participants: Address[];
+  /** One secp256k1 signing address per participant. States are signed with these keys. */
+  signers: Address[];
   assets: Address[];
   initialDeposits: bigint[];
   challengePeriod: bigint;
@@ -41,6 +46,13 @@ export const sphereStateTypes = {
     { name: "balances", type: "uint256[]" },
     { name: "appDataHash", type: "bytes32" },
     { name: "isFinal", type: "bool" },
+  ],
+} as const;
+
+export const joinSphereTypes = {
+  JoinSphere: [
+    { name: "sphereId", type: "bytes32" },
+    { name: "participant", type: "address" },
   ],
 } as const;
 
@@ -72,23 +84,50 @@ export async function signState(
   });
 }
 
-/**
- * Checks ECDSA signatures from EVM-address participants, in participant order. ED25519 participants and
- * long-zero aliases are verified on-ledger by HIP-632 isAuthorizedRaw and are reported as unverified here.
- */
-export async function verifyEcdsaSignatures(
+/** The JoinSphere signature a participant's signing key gives when the participant funds the sphere. */
+export async function signJoin(
+  signingKey: LocalAccount,
+  chainId: number | bigint,
+  anchor: Address,
+  sphereId: Hex,
+  participant: Address,
+): Promise<Hex> {
+  return signingKey.signTypedData({
+    domain: lightsphereDomain(chainId, anchor),
+    types: joinSphereTypes,
+    primaryType: "JoinSphere",
+    message: { sphereId, participant },
+  });
+}
+
+const SECP256K1_HALF_N = 0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0n;
+
+/** True if the anchor would accept this signature from `signer` over `hash`: 65 bytes, v in {0,1,27,28}, low s. */
+export async function isValidSignature(hash: Hex, signature: Hex, signer: Address): Promise<boolean> {
+  if (!/^0x[0-9a-fA-F]{130}$/.test(signature)) return false;
+  const v = Number(hexToBigInt(slice(signature, 64, 65)));
+  if (![0, 1, 27, 28].includes(v)) return false;
+  if (hexToBigInt(slice(signature, 32, 64)) > SECP256K1_HALF_N) return false;
+  try {
+    const recovered = await recoverAddress({ hash, signature });
+    return recovered.toLowerCase() === signer.toLowerCase();
+  } catch {
+    return false;
+  }
+}
+
+/** Checks one signature per signer, in order, exactly as the anchor does. */
+export async function verifyStateSignatures(
   chainId: number | bigint,
   anchor: Address,
   state: SphereState,
-  participants: Address[],
+  signers: Address[],
   signatures: Hex[],
 ): Promise<boolean> {
-  if (signatures.length !== participants.length) return false;
+  if (signatures.length !== signers.length || signers.length === 0) return false;
   const hash = stateDigest(chainId, anchor, state);
-  for (let i = 0; i < participants.length; i++) {
-    if (signatures[i].length !== 132) return false;
-    const signer = await recoverAddress({ hash, signature: signatures[i] });
-    if (signer.toLowerCase() !== participants[i].toLowerCase()) return false;
+  for (let i = 0; i < signers.length; i++) {
+    if (!(await isValidSignature(hash, signatures[i], signers[i]))) return false;
   }
   return true;
 }
@@ -101,6 +140,7 @@ const paramsAbi = [
     components: [
       { name: "mode", type: "uint8" },
       { name: "participants", type: "address[]" },
+      { name: "signers", type: "address[]" },
       { name: "assets", type: "address[]" },
       { name: "initialDeposits", type: "uint256[]" },
       { name: "challengePeriod", type: "uint64" },

@@ -4,7 +4,6 @@ package state
 
 import (
 	"crypto/ecdsa"
-	"crypto/ed25519"
 	"encoding/binary"
 	"errors"
 	"math/big"
@@ -17,6 +16,7 @@ import (
 var (
 	sphereStateTypeHash = crypto.Keccak256(
 		[]byte("SphereState(bytes32 sphereId,uint64 version,uint256[] balances,bytes32 appDataHash,bool isFinal)"))
+	joinTypeHash   = crypto.Keccak256([]byte("JoinSphere(bytes32 sphereId,address participant)"))
 	domainTypeHash = crypto.Keccak256(
 		[]byte("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"))
 	nameHash    = crypto.Keccak256([]byte("Lightsphere"))
@@ -83,6 +83,22 @@ func (d *Domain) Digest(s *SphereState) [32]byte {
 	return out
 }
 
+// JoinDigest is what a participant's signing key signs when the participant funds a sphere.
+func (d *Domain) JoinDigest(sphereID [32]byte, participant common.Address) [32]byte {
+	buf := make([]byte, 0, 3*32)
+	buf = append(buf, joinTypeHash...)
+	buf = append(buf, sphereID[:]...)
+	buf = append(buf, common.LeftPadBytes(participant.Bytes(), 32)...)
+	structHash := crypto.Keccak256(buf)
+	msg := make([]byte, 0, 66)
+	msg = append(msg, 0x19, 0x01)
+	msg = append(msg, d.separator[:]...)
+	msg = append(msg, structHash...)
+	var out [32]byte
+	copy(out[:], crypto.Keccak256(msg))
+	return out
+}
+
 // SignECDSA returns r||s||v with v in {27,28}; go-ethereum always produces low-s signatures.
 func SignECDSA(key *ecdsa.PrivateKey, digest [32]byte) ([]byte, error) {
 	sig, err := crypto.Sign(digest[:], key)
@@ -93,7 +109,7 @@ func SignECDSA(key *ecdsa.PrivateKey, digest [32]byte) ([]byte, error) {
 	return sig, nil
 }
 
-// VerifyECDSA checks a 65-byte signature against a 33- or 65-byte public key.
+// VerifyECDSA checks a 65-byte signature against a 33- or 65-byte public key. go-ethereum rejects high-s.
 func VerifyECDSA(pub []byte, digest [32]byte, sig []byte) bool {
 	if len(sig) != 65 {
 		return false
@@ -101,19 +117,11 @@ func VerifyECDSA(pub []byte, digest [32]byte, sig []byte) bool {
 	return crypto.VerifySignature(pub, digest[:], sig[:64])
 }
 
-// SignED25519 signs the 32-byte digest, as Hedera ED25519 accounts do for isAuthorizedRaw.
-func SignED25519(key ed25519.PrivateKey, digest [32]byte) []byte {
-	return ed25519.Sign(key, digest[:])
-}
-
-func VerifyED25519(pub ed25519.PublicKey, digest [32]byte, sig []byte) bool {
-	return len(sig) == 64 && ed25519.Verify(pub, digest[:], sig)
-}
-
 // SphereParams mirrors LightsphereTypes.SphereParams; field names match the ABI tuple components.
 type SphereParams struct {
 	Mode            uint8
 	Participants    []common.Address
+	Signers         []common.Address
 	Assets          []common.Address
 	InitialDeposits []*big.Int
 	ChallengePeriod uint64
@@ -128,6 +136,7 @@ func init() {
 	tuple, err := abi.NewType("tuple", "", []abi.ArgumentMarshaling{
 		{Name: "mode", Type: "uint8"},
 		{Name: "participants", Type: "address[]"},
+		{Name: "signers", Type: "address[]"},
 		{Name: "assets", Type: "address[]"},
 		{Name: "initialDeposits", Type: "uint256[]"},
 		{Name: "challengePeriod", Type: "uint64"},

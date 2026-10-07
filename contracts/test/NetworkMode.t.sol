@@ -46,7 +46,8 @@ contract NetworkModeTest is Base {
         T.SphereParams memory p;
         p.mode = T.MODE_NETWORK;
         p.assets = assets;
-        p.networkConfig = abi.encode(T.NetworkConfig("hiero:sphere-1", CH, bytes32("conn"), address(gw), INTERVAL, HALT));
+        p.networkConfig =
+            abi.encode(T.NetworkConfig("hiero:sphere-1", CH, bytes32("conn"), address(gw), INTERVAL, HALT));
         sid = anchor.open(p);
         gw.initialize(sid);
         actors = [alice, bob, carol];
@@ -67,8 +68,9 @@ contract NetworkModeTest is Base {
         uint64 epoch = gw.epoch();
         for (uint256 i; i < actors.length; ++i) {
             LightsphereGateway.Account memory a = gw.accountOf(actors[i], tok);
-            _snaps[epoch][actors[i]] =
-                Snap(a.balance, a.cumDepositsApplied, a.cumWithdrawalsInitiated, a.index != 0, gw.proofOf(actors[i], tok));
+            _snaps[epoch][actors[i]] = Snap(
+                a.balance, a.cumDepositsApplied, a.cumWithdrawalsInitiated, a.index != 0, gw.proofOf(actors[i], tok)
+            );
         }
         gw.checkpoint();
     }
@@ -86,6 +88,11 @@ contract NetworkModeTest is Base {
         else anchor.exitWithoutLeaf(sid, tok);
     }
 
+    function exitAs(address who) external {
+        require(msg.sender == address(this));
+        _exit(who);
+    }
+
     function _drain(address who) internal returns (uint256 amount) {
         amount = anchor.claimable(who, tok);
         if (amount != 0) {
@@ -101,8 +108,8 @@ contract NetworkModeTest is Base {
         clprA.relayAll();
         assertEq(gw.accountOf(alice, tok).balance, 100e18);
         clprB.relayAll(); // success response
-        assertEq(anchor.firstSuccessDepositId(sid, alice, tok), 1);
         assertEq(anchor.netDeposited(sid, alice, tok), 100e18);
+        assertFalse(anchor.depositRefunded(sid, 1));
     }
 
     function test_failedDeliveryRefundsDepositor() public {
@@ -113,6 +120,7 @@ contract NetworkModeTest is Base {
         clprB.relayAll();
         assertEq(anchor.claimable(alice, tok), 40e18);
         assertEq(anchor.netDeposited(sid, bob, tok), 0);
+        assertTrue(anchor.depositRefunded(sid, 1));
         assertEq(anchor.escrow(sid, tok), 0);
     }
 
@@ -178,6 +186,51 @@ contract NetworkModeTest is Base {
         assertEq(anchor.escrow(sid, tok), 0);
     }
 
+    /// Regression for an external review finding: the proof-free exit used to rely on success callbacks, which
+    /// CLPR only delivers best-effort. A dropped success callback let an account that had spent its deposit on the
+    /// sphere exit again without a proof, which also blocked an honest account's exit.
+    function test_droppedSuccessCallbackCannotOverpay() public {
+        _deposit(carol, carol, 100e18);
+        _deposit(alice, alice, 100e18);
+        clprA.relayAll(); // both applied on the sphere
+        clprB.relayOne(); // carol's success response: delivered
+        clprA.setDropNextResponse(true);
+        clprB.relayOne(); // alice's success response: the callback never runs
+        vm.prank(alice);
+        gw.transfer(tok, bob, 100e18); // alice spends her applied deposit
+        _checkpoint();
+        clprB.relayAll();
+        _halt();
+
+        vm.prank(alice);
+        vm.expectRevert(LightsphereAnchor.LeafRequired.selector);
+        anchor.exitWithoutLeaf(sid, tok);
+        _exit(alice); // with her leaf: balance 0
+        _exit(bob);
+        _exit(carol);
+        assertEq(_drain(alice), 0);
+        assertEq(_drain(bob), 100e18);
+        assertEq(_drain(carol), 100e18);
+        assertEq(anchor.escrow(sid, tok), 0);
+    }
+
+    function test_gatewayRejectsZeroAmountsAndZeroAddress() public {
+        _deposit(alice, alice, 10e18);
+        clprA.relayAll();
+        uint64 leavesBefore = gw.leafCount();
+        vm.startPrank(alice);
+        vm.expectRevert(LightsphereGateway.InvalidAmountOrRecipient.selector);
+        gw.transfer(tok, bob, 0);
+        vm.expectRevert(LightsphereGateway.InvalidAmountOrRecipient.selector);
+        gw.transfer(tok, address(0), 1);
+        vm.expectRevert(LightsphereGateway.InvalidAmountOrRecipient.selector);
+        gw.withdraw(tok, 1, address(0));
+        vm.expectRevert(LightsphereGateway.InvalidAmountOrRecipient.selector);
+        gw.withdraw(tok, 0, alice);
+        vm.stopPrank();
+        assertEq(gw.leafCount(), leavesBefore);
+    }
+
     function test_haltRules() public {
         _deposit(alice, alice, 50e18);
         clprA.relayAll();
@@ -240,7 +293,9 @@ contract NetworkModeTest is Base {
         vm.prank(address(clprA));
         vm.expectRevert(LightsphereAnchor.Unauthorized.selector);
         anchor.onClprMessage(
-            CH, abi.encodePacked(address(0xbad)), abi.encode(T.MSG_CHECKPOINT, sid, abi.encode(uint64(1), bytes32(0), uint64(0)))
+            CH,
+            abi.encodePacked(address(0xbad)),
+            abi.encode(T.MSG_CHECKPOINT, sid, abi.encode(uint64(1), bytes32(0), uint64(0)))
         );
     }
 
@@ -256,7 +311,7 @@ contract NetworkModeTest is Base {
             address who = actors[(op >> 8) % 3];
             address other = actors[(op >> 16) % 3];
             uint256 amount = ((op >> 24) % 1000e18) + 1;
-            uint256 kind = op % 9;
+            uint256 kind = op % 11;
             if (kind == 0) {
                 _deposit(who, other, amount);
                 minted += amount;
@@ -282,22 +337,36 @@ contract NetworkModeTest is Base {
                 }
             } else if (kind == 7) {
                 clprB.setFailNextDelivery(true);
-            } else {
+            } else if (kind == 8) {
                 clprA.setFailNextDelivery(true);
+            } else if (kind == 9) {
+                clprA.setDropNextResponse(true); // deposit responses at the anchor
+            } else {
+                clprB.setDropNextResponse(true); // withdrawal responses at the gateway
             }
         }
         // Some messages may still be in flight; the halt makes them irrelevant.
         _halt();
+        bool lostFailureResponse = clprA.droppedFailureResponses() != 0;
         for (uint256 i; i < actors.length; ++i) {
-            _exit(actors[i]);
+            if (lostFailureResponse) {
+                // An undelivered refund can leave an account without a leaf unable to exit; never overpaid.
+                try this.exitAs(actors[i]) {} catch {}
+            } else {
+                _exit(actors[i]);
+            }
         }
         uint256 paid;
         for (uint256 i; i < actors.length; ++i) {
             paid += _drain(actors[i]);
         }
-        assertEq(paid, minted, "paid out != deposited");
-        assertEq(anchor.escrow(sid, tok), 0);
-        assertEq(token.balanceOf(address(anchor)), 0);
+        if (lostFailureResponse) {
+            assertLe(paid, minted, "paid out more than deposited");
+        } else {
+            assertEq(paid, minted, "paid out != deposited");
+            assertEq(anchor.escrow(sid, tok), 0);
+            assertEq(token.balanceOf(address(anchor)), 0);
+        }
     }
 
     function test_gas_sphereTransferAndCheckpoint() public {
@@ -306,7 +375,7 @@ contract NetworkModeTest is Base {
         vm.prank(alice);
         uint256 g = gasleft();
         gw.transfer(tok, bob, 1e18);
-        emit log_named_uint("sphere transfer gas (two leaf updates, depth 20)", g - gasleft());
+        emit log_named_uint("sphere transfer gas (two leaf updates, depth 32)", g - gasleft());
         vm.warp(block.timestamp + INTERVAL);
         g = gasleft();
         gw.checkpoint();

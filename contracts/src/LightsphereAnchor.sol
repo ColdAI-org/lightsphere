@@ -10,17 +10,19 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {LightsphereTypes as T} from "./LightsphereTypes.sol";
 import {ILightsphereNetworkAnchor} from "./interfaces/ILightsphereAnchor.sol";
 import {IClprApplication, IClprServiceSend, CLPR_REPLY_SUCCESS} from "./interfaces/IClpr.sol";
-import {IHederaAccountService, IHederaTokenServiceLite, HederaResponseCodes} from "./interfaces/IHedera.sol";
+import {IHederaTokenServiceLite, HederaResponseCodes} from "./interfaces/IHedera.sol";
 
 /// @title LightsphereAnchor
 /// @notice Reference anchor contract for the Lightsphere HIP. Escrows HBAR and HTS fungible tokens for
 ///         signed-mode spheres (co-signed off-ledger states) and network-mode spheres (a Hiero network
 ///         connected over CLPR).
+/// @dev Signed-mode states are signed by per-participant secp256k1 signing keys that the sphere ID commits
+///      to. They are checked with ecrecover alone: a signature therefore stays valid whatever later happens
+///      to the participant's Hedera account keys, and costs the same for every account type.
 contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP712, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     address internal constant HTS = address(0x167);
-    address internal constant HAS = address(0x16a);
     uint256 internal constant SECP256K1_HALF_N = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0;
 
     uint64 public immutable MIN_CHALLENGE_PERIOD;
@@ -37,6 +39,7 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         uint32 fundedCount;
         bytes32 appDataHash;
         address[] participants;
+        address[] signers;
         address[] assets;
         uint256[] initialDeposits;
         uint256[] balances;
@@ -75,6 +78,12 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         bool released;
     }
 
+    /// @dev Deposits sent to one (sphere, recipient, asset), oldest first. `head` is the oldest one not refunded.
+    struct DepositQueue {
+        uint64[] ids;
+        uint256 head;
+    }
+
     mapping(bytes32 => Sphere) internal _spheres;
     mapping(bytes32 => Network) internal _networks;
     mapping(bytes32 => mapping(address => bool)) public funded;
@@ -85,8 +94,9 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
 
     mapping(bytes32 => mapping(address => mapping(address => uint256))) public netDeposited;
     mapping(bytes32 => mapping(address => mapping(address => uint256))) public withdrawn;
-    mapping(bytes32 => mapping(address => mapping(address => uint64))) public firstSuccessDepositId;
     mapping(bytes32 => mapping(address => mapping(address => bool))) public exited;
+    mapping(bytes32 => mapping(address => mapping(address => DepositQueue))) internal _depositQueues;
+    mapping(bytes32 => mapping(uint64 => bool)) public depositRefunded;
     mapping(bytes32 => PendingDeposit) internal _pendingDeposits; // keccak256(channelId, messageId)
     mapping(bytes32 => mapping(uint64 => PendingWithdrawal)) public withdrawals;
 
@@ -94,6 +104,7 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
     error InvalidStatus();
     error NotParticipant();
     error AlreadyFunded();
+    error BadJoinSignature();
     error WrongValue();
     error FeeOnTransfer();
     error AssetHasCustomFees(address token);
@@ -117,13 +128,14 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
     error TooEarly();
 
     constructor(address clprService_, uint64 minChallengePeriod) EIP712("Lightsphere", "1") {
+        if (minChallengePeriod > T.MAX_CHALLENGE_PERIOD) revert InvalidParams();
         clprService = clprService_;
         MIN_CHALLENGE_PERIOD = minChallengePeriod;
     }
 
     // ---------------------------------------------------------------- open
 
-    function open(T.SphereParams calldata p) external returns (bytes32 sphereId) {
+    function open(T.SphereParams calldata p) external nonReentrant returns (bytes32 sphereId) {
         uint256 nA = p.assets.length;
         if (nA == 0 || nA > T.MAX_ASSETS) revert InvalidParams();
         for (uint256 i; i < nA; ++i) {
@@ -141,18 +153,19 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
             s.challengePeriod = p.challengePeriod;
             s.fundingDeadline = p.fundingDeadline;
             s.participants = p.participants;
+            s.signers = p.signers;
             s.initialDeposits = p.initialDeposits;
             s.status = Status.FUNDING;
         } else if (p.mode == T.MODE_NETWORK) {
             if (
-                p.participants.length != 0 || p.initialDeposits.length != 0 || p.challengePeriod != 0
-                    || p.fundingDeadline != 0
+                p.participants.length != 0 || p.signers.length != 0 || p.initialDeposits.length != 0
+                    || p.challengePeriod != 0 || p.fundingDeadline != 0
             ) revert InvalidParams();
             T.NetworkConfig memory c = abi.decode(p.networkConfig, (T.NetworkConfig));
-            if (c.gateway == address(0) || c.checkpointInterval == 0 || c.haltTimeout < 3 * uint256(c.checkpointInterval))
-            {
-                revert InvalidParams();
-            }
+            if (
+                c.gateway == address(0) || c.checkpointInterval == 0
+                    || c.haltTimeout < 3 * uint256(c.checkpointInterval)
+            ) revert InvalidParams();
             Network storage n = _networks[sphereId];
             n.channelId = c.channelId;
             n.connectorId = c.connectorId;
@@ -172,32 +185,22 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         }
 
         emit SphereOpened(sphereId, p);
-
-        if (p.mode == T.MODE_SIGNED) {
-            uint256 nP = p.participants.length;
-            for (uint256 i; i < nP; ++i) {
-                bool zeroRow = true;
-                for (uint256 a; a < nA; ++a) {
-                    if (p.initialDeposits[i * nA + a] != 0) zeroRow = false;
-                }
-                if (zeroRow) _markFunded(sphereId, s, p.participants[i]);
-            }
-        } else {
-            emit SphereActive(sphereId);
-        }
+        if (p.mode == T.MODE_NETWORK) emit SphereActive(sphereId);
     }
 
     function _validateSigned(T.SphereParams calldata p) internal view {
         uint256 nP = p.participants.length;
-        if (nP < 2 || nP > T.MAX_PARTICIPANTS) revert InvalidParams();
+        if (nP < 2 || nP > T.MAX_PARTICIPANTS || p.signers.length != nP) revert InvalidParams();
         for (uint256 i; i < nP; ++i) {
-            if (p.participants[i] == address(0)) revert InvalidParams();
+            if (p.participants[i] == address(0) || p.signers[i] == address(0)) revert InvalidParams();
             for (uint256 j = i + 1; j < nP; ++j) {
-                if (p.participants[i] == p.participants[j]) revert InvalidParams();
+                if (p.participants[i] == p.participants[j] || p.signers[i] == p.signers[j]) revert InvalidParams();
             }
         }
         if (p.initialDeposits.length != nP * p.assets.length) revert InvalidParams();
-        if (p.challengePeriod < MIN_CHALLENGE_PERIOD) revert InvalidParams();
+        if (p.challengePeriod < MIN_CHALLENGE_PERIOD || p.challengePeriod > T.MAX_CHALLENGE_PERIOD) {
+            revert InvalidParams();
+        }
         if (p.fundingDeadline <= block.timestamp) revert InvalidParams();
         if (p.networkConfig.length != 0) revert InvalidParams();
     }
@@ -205,11 +208,26 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
     /// @dev For HTS tokens: reject custom fees and associate the anchor. Anything that does not answer as an
     ///      HTS token is treated as a plain ERC-20 (fee-on-transfer is still caught by balance checks).
     function _prepareAsset(address token) internal {
-        if (token == address(0)) return;
+        if (!_isHtsWithoutCustomFees(token)) return;
+        (bool ok, bytes memory ret) =
+            HTS.call(abi.encodeCall(IHederaTokenServiceLite.associateToken, (address(this), token)));
+        if (!ok || ret.length < 32) revert AssociationFailed(token);
+        int256 rc = abi.decode(ret, (int256));
+        if (rc != HederaResponseCodes.SUCCESS && rc != HederaResponseCodes.TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT) {
+            revert AssociationFailed(token);
+        }
+    }
+
+    /// @dev Returns true for an HTS token with no custom fees, false for HBAR or a non-HTS token, and reverts
+    ///      for an HTS token that has any custom fee. Called at open and again before every token payout,
+    ///      because a token's fee schedule can change after a sphere opens, and a fee charged to the anchor as
+    ///      sender would be paid out of every sphere's escrow.
+    function _isHtsWithoutCustomFees(address token) internal returns (bool) {
+        if (token == address(0)) return false;
         (bool ok, bytes memory ret) =
             HTS.call(abi.encodeWithSelector(IHederaTokenServiceLite.getTokenCustomFees.selector, token));
-        if (!ok || ret.length < 128) return;
-        if (abi.decode(ret, (int256)) != HederaResponseCodes.SUCCESS) return;
+        if (!ok || ret.length < 128) return false;
+        if (abi.decode(ret, (int256)) != HederaResponseCodes.SUCCESS) return false;
         for (uint256 k = 1; k <= 3; ++k) {
             uint256 offset;
             assembly {
@@ -222,22 +240,21 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
             }
             if (len != 0) revert AssetHasCustomFees(token);
         }
-        (ok, ret) = HTS.call(abi.encodeCall(IHederaTokenServiceLite.associateToken, (address(this), token)));
-        if (!ok || ret.length < 32) revert AssociationFailed(token);
-        int256 rc = abi.decode(ret, (int256));
-        if (rc != HederaResponseCodes.SUCCESS && rc != HederaResponseCodes.TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT) {
-            revert AssociationFailed(token);
-        }
+        return true;
     }
 
     // ---------------------------------------------------------------- signed mode: funding
 
-    function fund(bytes32 sphereId) external payable nonReentrant {
+    /// @param joinSig The participant's signing key over JoinSphere(sphereId, participant). Proves the key works
+    ///        before anyone's funds depend on it.
+    function fund(bytes32 sphereId, bytes calldata joinSig) external payable nonReentrant {
         Sphere storage s = _spheres[sphereId];
         if (s.status != Status.FUNDING || s.mode != T.MODE_SIGNED) revert InvalidStatus();
         if (block.timestamp > s.fundingDeadline) revert InvalidStatus();
         uint256 idx = _participantIndex(s, msg.sender);
         if (funded[sphereId][msg.sender]) revert AlreadyFunded();
+        bytes32 jd = _hashTypedDataV4(keccak256(abi.encode(T.JOIN_SPHERE_TYPEHASH, sphereId, msg.sender)));
+        if (!_validSignature(s.signers[idx], jd, joinSig)) revert BadJoinSignature();
 
         uint256 nA = s.assets.length;
         uint256 hbarDue;
@@ -253,12 +270,9 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
             escrow[sphereId][asset] += amount;
         }
         if (msg.value != hbarDue) revert WrongValue();
-        _markFunded(sphereId, s, msg.sender);
-    }
 
-    function _markFunded(bytes32 sphereId, Sphere storage s, address participant) internal {
-        funded[sphereId][participant] = true;
-        emit SphereFunded(sphereId, participant);
+        funded[sphereId][msg.sender] = true;
+        emit SphereFunded(sphereId, msg.sender);
         if (++s.fundedCount == s.participants.length) {
             s.status = Status.OPEN;
             emit SphereActive(sphereId);
@@ -283,6 +297,8 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
 
     // ---------------------------------------------------------------- signed mode: states
 
+    /// @notice Settles at once on a fully signed final state. Accepted while OPEN or CLOSING (including after the
+    ///         window, until finalizeClose), provided it is not older than the recorded state.
     function closeCooperative(T.SphereState calldata state, bytes[] calldata sigs) external nonReentrant {
         Sphere storage s = _spheres[state.sphereId];
         if (s.status != Status.OPEN && s.status != Status.CLOSING) revert InvalidStatus();
@@ -293,7 +309,7 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         _settle(state.sphereId, s);
     }
 
-    function checkpoint(T.SphereState calldata state, bytes[] calldata sigs) external {
+    function checkpoint(T.SphereState calldata state, bytes[] calldata sigs) external nonReentrant {
         Sphere storage s = _spheres[state.sphereId];
         if (s.status == Status.CLOSING) {
             if (block.timestamp >= s.challengeEndsAt) revert WindowClosed();
@@ -305,7 +321,9 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         _record(s, state);
     }
 
-    function startClose(bytes32 sphereId, T.SphereState calldata state, bytes[] calldata sigs) external {
+    /// @notice Participant-only. Opens the challenge window. A fully signed state passed in is recorded if it is
+    ///         newer than the recorded one and ignored otherwise.
+    function startClose(bytes32 sphereId, T.SphereState calldata state, bytes[] calldata sigs) external nonReentrant {
         Sphere storage s = _spheres[sphereId];
         if (s.status != Status.OPEN || s.mode != T.MODE_SIGNED) revert InvalidStatus();
         _participantIndex(s, msg.sender);
@@ -315,7 +333,7 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
             if (!s.hasState || state.version > s.version) _record(s, state);
         }
         s.status = Status.CLOSING;
-        s.challengeEndsAt = uint64(block.timestamp) + s.challengePeriod;
+        s.challengeEndsAt = uint64(block.timestamp + uint256(s.challengePeriod));
         emit CloseStarted(sphereId, s.version, s.challengeEndsAt);
     }
 
@@ -326,7 +344,7 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         _settle(sphereId, s);
     }
 
-    function _verifyState(Sphere storage s, T.SphereState calldata state, bytes[] calldata sigs) internal {
+    function _verifyState(Sphere storage s, T.SphereState calldata state, bytes[] calldata sigs) internal view {
         if (s.mode != T.MODE_SIGNED) revert InvalidStatus();
         uint256 nP = s.participants.length;
         uint256 nA = s.assets.length;
@@ -343,7 +361,7 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         if (sigs.length != nP) revert BadSignatures();
         bytes32 digest = _hashTypedDataV4(T.hashState(state));
         for (uint256 p; p < nP; ++p) {
-            if (!_isAuthorized(s.participants[p], digest, sigs[p])) revert BadSignatures();
+            if (!_validSignature(s.signers[p], digest, sigs[p])) revert BadSignatures();
         }
     }
 
@@ -367,23 +385,17 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         emit SphereSettled(sphereId, s.version, s.appDataHash);
     }
 
-    /// @dev Same result as HIP-632 isAuthorizedRaw. 65-byte signatures that recover to the EVM address alias
-    ///      take the cheap ecrecover path; everything else (ED25519, long-zero aliases) goes to 0x16a.
-    function _isAuthorized(address who, bytes32 digest, bytes calldata sig) internal returns (bool) {
-        if (sig.length == 65) {
-            bytes32 r = bytes32(sig[0:32]);
-            bytes32 sv = bytes32(sig[32:64]);
-            uint8 v = uint8(sig[64]);
-            if (uint256(sv) > SECP256K1_HALF_N) return false;
-            if (v < 27) v += 27;
-            address rec = ecrecover(digest, v, r, sv);
-            if (rec != address(0) && rec == who) return true;
-        } else if (sig.length != 64) {
-            return false;
-        }
-        (bool ok, bytes memory ret) =
-            HAS.call(abi.encodeCall(IHederaAccountService.isAuthorizedRaw, (who, abi.encodePacked(digest), sig)));
-        return ok && ret.length >= 32 && abi.decode(ret, (bool));
+    /// @dev 65-byte r||s||v secp256k1 signature, v in {0, 1, 27, 28}, low s, recovering to `signer`.
+    function _validSignature(address signer, bytes32 digest, bytes calldata sig) internal pure returns (bool) {
+        if (sig.length != 65) return false;
+        bytes32 r = bytes32(sig[0:32]);
+        bytes32 sv = bytes32(sig[32:64]);
+        uint8 v = uint8(sig[64]);
+        if (v < 27) v += 27;
+        if (v != 27 && v != 28) return false;
+        if (uint256(sv) > SECP256K1_HALF_N) return false;
+        address rec = ecrecover(digest, v, r, sv);
+        return rec != address(0) && rec == signer;
     }
 
     // ---------------------------------------------------------------- network mode: deposits
@@ -408,36 +420,35 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         uint64 depositId = ++n.nextDepositId;
         escrow[sphereId][asset] += amount;
         netDeposited[sphereId][recipient][asset] += amount;
+        _depositQueues[sphereId][recipient][asset].ids.push(depositId);
 
-        bytes memory payload = abi.encode(
-            T.MSG_DEPOSIT, sphereId, abi.encode(depositId, asset, amount, recipient)
-        );
-        uint64 messageId = IClprServiceSend(clprService).sendMessage(
-            n.channelId, n.connectorId, abi.encodePacked(n.gateway), payload
-        );
+        bytes memory payload = abi.encode(T.MSG_DEPOSIT, sphereId, abi.encode(depositId, asset, amount, recipient));
+        uint64 messageId =
+            IClprServiceSend(clprService).sendMessage(n.channelId, n.connectorId, abi.encodePacked(n.gateway), payload);
         _pendingDeposits[keccak256(abi.encode(n.channelId, messageId))] =
             PendingDeposit(sphereId, depositId, msg.sender, recipient, asset, amount);
         emit DepositSent(sphereId, depositId, recipient, asset, amount);
     }
 
-    /// @dev Must never revert: CLPR delivers responses best-effort and drops a reverting callback.
+    /// @dev Must never revert: CLPR delivers responses best-effort and drops a reverting callback. Nothing in the
+    ///      exit rules depends on a success response arriving; a missing failure response only leaves a deposit
+    ///      counted as live, which errs towards requiring a leaf.
     function onClprResponse(bytes32 channelId, uint64 messageId, uint8 replyStatus, bytes calldata) external {
         if (msg.sender != clprService) return;
         bytes32 key = keccak256(abi.encode(channelId, messageId));
         PendingDeposit memory d = _pendingDeposits[key];
         if (d.depositId == 0) return;
         delete _pendingDeposits[key];
-        Sphere storage s = _spheres[d.sphereId];
-        if (s.status != Status.OPEN) return; // halted: the exit formula settles this deposit
-        if (replyStatus == CLPR_REPLY_SUCCESS) {
-            if (firstSuccessDepositId[d.sphereId][d.recipient][d.asset] == 0) {
-                firstSuccessDepositId[d.sphereId][d.recipient][d.asset] = d.depositId;
-            }
-            return;
-        }
+        if (replyStatus == CLPR_REPLY_SUCCESS) return;
+        if (_spheres[d.sphereId].status != Status.OPEN) return; // halted: the exit formula settles this deposit
+        if (escrow[d.sphereId][d.asset] < d.amount) return; // only reachable if the sphere lied; never revert
+
         netDeposited[d.sphereId][d.recipient][d.asset] -= d.amount;
         escrow[d.sphereId][d.asset] -= d.amount;
         _claimable[d.depositor][d.asset] += d.amount;
+        depositRefunded[d.sphereId][d.depositId] = true;
+        DepositQueue storage q = _depositQueues[d.sphereId][d.recipient][d.asset];
+        while (q.head < q.ids.length && depositRefunded[d.sphereId][q.ids[q.head]]) ++q.head;
         emit DepositRefunded(d.sphereId, d.depositId);
     }
 
@@ -445,6 +456,7 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
 
     function onClprMessage(bytes32 channelId, bytes calldata sender, bytes calldata messageData)
         external
+        nonReentrant
         returns (bytes memory)
     {
         if (msg.sender != clprService) revert Unauthorized();
@@ -484,7 +496,7 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
 
     /// @notice Credits a withdrawal once a checkpoint covering its epoch has been accepted. Holding it until
     ///         then stops funds that arrived after a checkpoint from being withdrawn and also exited.
-    function releaseWithdrawal(bytes32 sphereId, uint64 withdrawalId) external {
+    function releaseWithdrawal(bytes32 sphereId, uint64 withdrawalId) external nonReentrant {
         Sphere storage s = _spheres[sphereId];
         if (s.mode != T.MODE_NETWORK || s.status != Status.OPEN) revert InvalidStatus();
         Network storage n = _networks[sphereId];
@@ -498,7 +510,7 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
 
     // ---------------------------------------------------------------- network mode: halt and exit
 
-    function declareHalt(bytes32 sphereId) external {
+    function declareHalt(bytes32 sphereId) external nonReentrant {
         Sphere storage s = _spheres[sphereId];
         if (s.mode != T.MODE_NETWORK || s.status != Status.OPEN) revert InvalidStatus();
         Network storage n = _networks[sphereId];
@@ -526,13 +538,17 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         _payExit(sphereId, asset, amount);
     }
 
-    /// @notice Exit for an account with no leaf in the last checkpoint. Allowed only when no deposit to the
-    ///         account had been applied by that checkpoint, which makes the result a lower bound of the
-    ///         leaf-based amount and so never more than the account is owed.
+    /// @notice Exit for an account with no leaf in the last checkpoint. Allowed only when none of the account's
+    ///         live (not refunded) deposits has an id at or below the checkpoint's lastAppliedDepositId, so none
+    ///         of them can have been applied by that checkpoint. The result is then a lower bound of the
+    ///         leaf-based amount and never more than the account is owed. The rule depends only on deposits
+    ///         sent and refunds received, never on a success response arriving.
     function exitWithoutLeaf(bytes32 sphereId, address asset) external nonReentrant {
         Network storage n = _beginExit(sphereId, asset);
-        uint64 first = firstSuccessDepositId[sphereId][msg.sender][asset];
-        if (n.hasCheckpoint && first != 0 && first <= n.lastAppliedDepositId) revert LeafRequired();
+        DepositQueue storage q = _depositQueues[sphereId][msg.sender][asset];
+        if (n.hasCheckpoint && q.head < q.ids.length && q.ids[q.head] <= n.lastAppliedDepositId) {
+            revert LeafRequired();
+        }
         int256 amount =
             int256(netDeposited[sphereId][msg.sender][asset]) - int256(withdrawn[sphereId][msg.sender][asset]);
         _payExit(sphereId, asset, amount);
@@ -548,6 +564,7 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
     }
 
     function _payExit(bytes32 sphereId, address asset, int256 amount) internal {
+        // forge-lint: disable-next-line(unsafe-typecast)
         uint256 pay = amount > 0 ? uint256(amount) : 0;
         _credit(sphereId, msg.sender, asset, pay);
         emit Exited(sphereId, msg.sender, asset, pay);
@@ -556,14 +573,31 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
     // ---------------------------------------------------------------- payouts
 
     function withdraw(address asset) external nonReentrant {
+        _withdrawTo(asset, msg.sender);
+    }
+
+    /// @notice Pays the caller's claimable balance to another address, for example when the caller is a contract
+    ///         that cannot receive HBAR.
+    function withdrawTo(address asset, address to) external nonReentrant {
+        if (to == address(0)) revert InvalidParams();
+        _withdrawTo(asset, to);
+    }
+
+    function _withdrawTo(address asset, address to) internal {
         uint256 amount = _claimable[msg.sender][asset];
         if (amount == 0) revert NothingToWithdraw();
         _claimable[msg.sender][asset] = 0;
         if (asset == address(0)) {
-            (bool ok,) = payable(msg.sender).call{value: amount}("");
+            (bool ok,) = payable(to).call{value: amount}("");
             if (!ok) revert TransferFailed();
         } else {
-            IERC20(asset).safeTransfer(msg.sender, amount);
+            _isHtsWithoutCustomFees(asset); // reverts if a custom fee was added after the sphere opened
+            uint256 hbarBefore = address(this).balance;
+            uint256 before = IERC20(asset).balanceOf(address(this));
+            IERC20(asset).safeTransfer(to, amount);
+            if (before - IERC20(asset).balanceOf(address(this)) != amount || address(this).balance != hbarBefore) {
+                revert FeeOnTransfer();
+            }
         }
         emit Withdrawn(msg.sender, asset, amount);
     }
@@ -600,12 +634,21 @@ contract LightsphereAnchor is ILightsphereNetworkAnchor, IClprApplication, EIP71
         return _spheres[sphereId].challengeEndsAt;
     }
 
+    function participantsOf(bytes32 sphereId) external view returns (address[] memory, address[] memory) {
+        Sphere storage s = _spheres[sphereId];
+        return (s.participants, s.signers);
+    }
+
     function network(bytes32 sphereId) external view returns (Network memory) {
         return _networks[sphereId];
     }
 
     function stateDigest(T.SphereState calldata state) external view returns (bytes32) {
         return _hashTypedDataV4(T.hashState(state));
+    }
+
+    function joinDigest(bytes32 sphereId, address participant) external view returns (bytes32) {
+        return _hashTypedDataV4(keccak256(abi.encode(T.JOIN_SPHERE_TYPEHASH, sphereId, participant)));
     }
 
     function domainSeparator() external view returns (bytes32) {

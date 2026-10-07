@@ -1,4 +1,4 @@
-module github.com/shayansal/lightsphere/harness
+module github.com/ColdAI-org/lightsphere/harness
 
 go 1.24.0
 

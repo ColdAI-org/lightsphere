@@ -23,13 +23,15 @@ contract SignedModeTest is Base {
         anchor = new LightsphereAnchor(address(0xC1A9), MIN_CHALLENGE);
         pks = new uint256[](2);
         (pks[0], pks[1]) = (alicePk, bobPk);
-        sid = _openAndFund();
+        sid = _openAndFund(_params());
     }
 
     function _params() internal view returns (T.SphereParams memory p) {
         p.mode = T.MODE_SIGNED;
         p.participants = new address[](2);
         (p.participants[0], p.participants[1]) = (alice, bob);
+        p.signers = new address[](2); // ECDSA accounts sign with their own key
+        (p.signers[0], p.signers[1]) = (alice, bob);
         p.assets = new address[](2);
         (p.assets[0], p.assets[1]) = (HBAR, address(token));
         p.initialDeposits = _u(A_H, A_T, B_H, B_T);
@@ -37,20 +39,19 @@ contract SignedModeTest is Base {
         p.fundingDeadline = uint64(block.timestamp + 1 days);
     }
 
-    function _openAndFund() internal returns (bytes32 id) {
-        id = anchor.open(_params());
-        vm.deal(alice, A_H);
-        vm.deal(bob, B_H);
-        token.mint(alice, A_T);
-        token.mint(bob, B_T);
-        vm.prank(alice);
-        token.approve(address(anchor), A_T);
-        vm.prank(bob);
-        token.approve(address(anchor), B_T);
-        vm.prank(alice);
-        anchor.fund{value: A_H}(id);
-        vm.prank(bob);
-        anchor.fund{value: B_H}(id);
+    function _fundAs(bytes32 id, address who, uint256 signerPk, uint256 hbar, uint256 tok) internal {
+        vm.deal(who, hbar);
+        token.mint(who, tok);
+        vm.startPrank(who);
+        token.approve(address(anchor), tok);
+        anchor.fund{value: hbar}(id, _join(anchor, id, who, signerPk));
+        vm.stopPrank();
+    }
+
+    function _openAndFund(T.SphereParams memory p) internal returns (bytes32 id) {
+        id = anchor.open(p);
+        _fundAs(id, alice, alicePk, A_H, A_T);
+        _fundAs(id, bob, bobPk, B_H, B_T);
     }
 
     function test_openFundsAndActivates() public view {
@@ -74,6 +75,15 @@ contract SignedModeTest is Base {
         assertEq(token.balanceOf(bob), B_T + 30e18);
         assertEq(anchor.claimable(alice, HBAR), A_H - 2e8);
         assertEq(anchor.escrow(sid, HBAR), 0);
+    }
+
+    function test_withdrawToAnotherAddress() public {
+        T.SphereState memory s = _state(sid, 1, _u(A_H, A_T, B_H, B_T), true);
+        anchor.closeCooperative(s, _signAll(anchor, s, pks));
+        vm.prank(alice);
+        anchor.withdrawTo(HBAR, carol);
+        assertEq(carol.balance, A_H);
+        assertEq(anchor.claimable(alice, HBAR), 0);
     }
 
     function test_staleCloseIsReplacedDuringWindow() public {
@@ -133,7 +143,7 @@ contract SignedModeTest is Base {
         anchor.checkpoint(s, one);
     }
 
-    function test_rejectsHighS() public {
+    function test_rejectsHighSAndBadV() public {
         T.SphereState memory s = _state(sid, 5, _u(A_H, A_T, B_H, B_T), false);
         bytes32 digest = anchor.stateDigest(s);
         bytes[] memory sigs = _signAll(anchor, s, pks);
@@ -141,6 +151,13 @@ contract SignedModeTest is Base {
         uint256 n = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141;
         sigs[1] = abi.encodePacked(r, bytes32(n - uint256(sv)), v == 27 ? uint8(28) : uint8(27));
         vm.expectRevert(LightsphereAnchor.BadSignatures.selector);
+        anchor.checkpoint(s, sigs);
+
+        sigs[1] = abi.encodePacked(r, sv, uint8(v + 2)); // v = 29 or 30
+        vm.expectRevert(LightsphereAnchor.BadSignatures.selector);
+        anchor.checkpoint(s, sigs);
+
+        sigs[1] = abi.encodePacked(r, sv, uint8(v - 27)); // v in {0, 1} is accepted
         anchor.checkpoint(s, sigs);
     }
 
@@ -154,12 +171,12 @@ contract SignedModeTest is Base {
     function test_stateCannotBeReplayedOnAnotherSphereOrAnchor() public {
         T.SphereParams memory p = _params();
         p.salt = bytes32(uint256(1));
-        bytes32 other = anchor.open(p);
+        bytes32 other = _openAndFund(p);
         T.SphereState memory s = _state(sid, 5, _u(A_H, A_T, B_H, B_T), false);
         bytes[] memory sigs = _signAll(anchor, s, pks);
-        // Same signatures, other sphere id in the state: the digest no longer matches.
+        // Same signatures, the other sphere's id in the state: the digest no longer matches.
         T.SphereState memory moved = _state(other, 5, _u(A_H, A_T, B_H, B_T), false);
-        vm.expectRevert(LightsphereAnchor.InvalidStatus.selector); // other sphere is still FUNDING
+        vm.expectRevert(LightsphereAnchor.BadSignatures.selector);
         anchor.checkpoint(moved, sigs);
 
         LightsphereAnchor anchor2 = new LightsphereAnchor(address(0xC1A9), MIN_CHALLENGE);
@@ -170,32 +187,61 @@ contract SignedModeTest is Base {
         assertTrue(testnetDigest != anchor.stateDigest(s));
     }
 
-    function test_ed25519ParticipantViaHAS() public {
-        T.SphereState memory s = _state(sid, 7, _u(A_H - 1, A_T, B_H + 1, B_T), false);
-        bytes32 digest = anchor.stateDigest(s);
-        bytes[] memory sigs = _signAll(anchor, s, pks);
-        // Pretend Bob's account has an ED25519 key: a 64-byte signature that 0x16a accepts.
-        sigs[1] = abi.encodePacked(keccak256("ed-r"), keccak256("ed-s"));
-        vm.expectRevert(LightsphereAnchor.BadSignatures.selector);
-        anchor.checkpoint(s, sigs);
-        has.approveEd25519(bob, digest, sigs[1]);
-        anchor.checkpoint(s, sigs);
-        (uint64 version,) = anchor.latestState(sid);
-        assertEq(version, 7);
+    /// A Hedera account with an ED25519 key (or a long-zero alias, or a threshold key) joins by naming a separate
+    /// secp256k1 signing key. Its states stay valid whatever happens to the account's own keys later.
+    function test_accountWithSeparateSigningKey() public {
+        address hederaAccount = address(uint160(0x4c5350)); // a long-zero alias, say 0.0.5002064
+        uint256 sessionPk = 0x5E5510;
+        T.SphereParams memory p = _params();
+        p.participants[1] = hederaAccount;
+        p.signers[1] = vm.addr(sessionPk);
+        p.salt = bytes32(uint256(7));
+        bytes32 id = anchor.open(p);
+        _fundAs(id, alice, alicePk, A_H, A_T);
+
+        // The account's own key is not the signing key: funding with it fails.
+        vm.deal(hederaAccount, B_H);
+        token.mint(hederaAccount, B_T);
+        vm.startPrank(hederaAccount);
+        token.approve(address(anchor), B_T);
+        bytes memory wrong = _join(anchor, id, hederaAccount, bobPk);
+        vm.expectRevert(LightsphereAnchor.BadJoinSignature.selector);
+        anchor.fund{value: B_H}(id, wrong);
+        anchor.fund{value: B_H}(id, _join(anchor, id, hederaAccount, sessionPk));
+        vm.stopPrank();
+
+        uint256[] memory keys = new uint256[](2);
+        (keys[0], keys[1]) = (alicePk, sessionPk);
+        T.SphereState memory s = _state(id, 42, _u(A_H - 1e8, A_T, B_H + 1e8, B_T), true);
+        anchor.closeCooperative(s, _signAll(anchor, s, keys));
+        assertEq(anchor.claimable(hederaAccount, HBAR), B_H + 1e8); // paid to the account, not the signing key
+        assertEq(anchor.claimable(vm.addr(sessionPk), HBAR), 0);
     }
 
-    function test_longZeroAliasFallsBackToHAS() public {
-        address longZero = address(uint160(0x1234));
-        has.mapLongZero(longZero, carol);
+    function test_joinSignatureIsBoundToSphereAndParticipant() public {
         T.SphereParams memory p = _params();
-        p.participants[1] = longZero;
-        p.initialDeposits = _u(0, 0, 0, 0);
+        p.salt = bytes32(uint256(8));
         bytes32 id = anchor.open(p);
-        uint256[] memory keys = new uint256[](2);
-        (keys[0], keys[1]) = (alicePk, carolPk);
-        T.SphereState memory s = _state(id, 1, _u(0, 0, 0, 0), true);
-        anchor.closeCooperative(s, _signAll(anchor, s, keys));
-        assertEq(uint8(anchor.status(id)), uint8(ILightsphereAnchor.Status.SETTLED));
+        bytes memory forOtherSphere = _join(anchor, sid, alice, alicePk);
+        vm.deal(alice, A_H);
+        token.mint(alice, A_T);
+        vm.startPrank(alice);
+        token.approve(address(anchor), A_T);
+        vm.expectRevert(LightsphereAnchor.BadJoinSignature.selector);
+        anchor.fund{value: A_H}(id, forOtherSphere);
+        vm.stopPrank();
+    }
+
+    function test_rejectsDuplicateOrMissingSigners() public {
+        T.SphereParams memory p = _params();
+        p.signers = new address[](2);
+        (p.signers[0], p.signers[1]) = (alice, alice);
+        vm.expectRevert(LightsphereAnchor.InvalidParams.selector);
+        anchor.open(p);
+        p.signers = new address[](1);
+        p.signers[0] = alice;
+        vm.expectRevert(LightsphereAnchor.InvalidParams.selector);
+        anchor.open(p);
     }
 
     function test_rejectsHtsTokenWithCustomFees() public {
@@ -207,6 +253,24 @@ contract SignedModeTest is Base {
         anchor.open(p);
     }
 
+    /// A token's fee schedule can change after open. A fee charged to the anchor as sender would come out of
+    /// every sphere's escrow, so the anchor re-checks before each token payout and refuses while fees exist.
+    function test_customFeeAddedAfterOpenBlocksTokenPayout() public {
+        T.SphereState memory s = _state(sid, 1, _u(A_H, A_T, B_H, B_T), true);
+        anchor.closeCooperative(s, _signAll(anchor, s, pks));
+        hts.register(address(token), true); // fee schedule key adds a fee
+        vm.prank(bob);
+        vm.expectRevert(abi.encodeWithSelector(LightsphereAnchor.AssetHasCustomFees.selector, address(token)));
+        anchor.withdraw(address(token));
+        vm.prank(bob);
+        anchor.withdraw(HBAR); // HBAR is unaffected
+        assertEq(bob.balance, B_H);
+        hts.register(address(token), false); // fee removed: payouts resume
+        vm.prank(bob);
+        anchor.withdraw(address(token));
+        assertEq(token.balanceOf(bob), B_T);
+    }
+
     function test_rejectsFeeOnTransferErc20() public {
         FeeOnTransferToken feeToken = new FeeOnTransferToken();
         T.SphereParams memory p = _params();
@@ -216,8 +280,9 @@ contract SignedModeTest is Base {
         vm.deal(alice, A_H);
         vm.startPrank(alice);
         feeToken.approve(address(anchor), A_T);
+        bytes memory j = _join(anchor, id, alice, alicePk);
         vm.expectRevert(LightsphereAnchor.FeeOnTransfer.selector);
-        anchor.fund{value: A_H}(id);
+        anchor.fund{value: A_H}(id, j);
         vm.stopPrank();
     }
 
@@ -225,12 +290,7 @@ contract SignedModeTest is Base {
         T.SphereParams memory p = _params();
         p.salt = bytes32(uint256(2));
         bytes32 id = anchor.open(p);
-        vm.deal(alice, A_H);
-        token.mint(alice, A_T);
-        vm.startPrank(alice);
-        token.approve(address(anchor), A_T);
-        anchor.fund{value: A_H}(id);
-        vm.stopPrank();
+        _fundAs(id, alice, alicePk, A_H, A_T);
         vm.expectRevert(LightsphereAnchor.TooEarly.selector);
         anchor.reclaimFunding(id);
         vm.warp(p.fundingDeadline + 1);
@@ -239,11 +299,21 @@ contract SignedModeTest is Base {
         assertEq(anchor.claimable(bob, HBAR), 0);
     }
 
-    function test_rejectsShortChallengePeriod() public {
+    function test_rejectsChallengePeriodOutOfRange() public {
         T.SphereParams memory p = _params();
         p.challengePeriod = MIN_CHALLENGE - 1;
         vm.expectRevert(LightsphereAnchor.InvalidParams.selector);
         anchor.open(p);
+        p.challengePeriod = T.MAX_CHALLENGE_PERIOD + 1;
+        vm.expectRevert(LightsphereAnchor.InvalidParams.selector);
+        anchor.open(p);
+        p.challengePeriod = T.MAX_CHALLENGE_PERIOD; // the longest allowed window still closes
+        p.salt = bytes32(uint256(9));
+        bytes32 id = _openAndFund(p);
+        vm.prank(alice);
+        anchor.startClose(id, _state(id, 0, new uint256[](0), false), new bytes[](0));
+        vm.warp(block.timestamp + T.MAX_CHALLENGE_PERIOD);
+        anchor.finalizeClose(id);
     }
 
     /// Any conserving split, at any version, settles exactly what was signed and empties the escrow.
@@ -270,11 +340,17 @@ contract SignedModeTest is Base {
             keys[i] = 0x1000 + i;
             p.participants[i] = vm.addr(keys[i]);
         }
+        p.signers = p.participants;
         p.assets = new address[](1);
         p.initialDeposits = new uint256[](n);
         p.challengePeriod = MIN_CHALLENGE;
         p.fundingDeadline = uint64(block.timestamp + 1 days);
         bytes32 id = anchor.open(p);
+        for (uint256 i; i < n; ++i) {
+            bytes memory j = _join(anchor, id, p.participants[i], keys[i]);
+            vm.prank(p.participants[i]);
+            anchor.fund(id, j);
+        }
         T.SphereState memory s = _state(id, 1, new uint256[](n), true);
         bytes[] memory sigs = _signAll(anchor, s, keys);
         uint256 g = gasleft();

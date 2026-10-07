@@ -37,6 +37,7 @@ contract VectorsTest is Base {
         T.SphereParams memory p;
         p.mode = T.MODE_SIGNED;
         p.participants = json.readAddressArray(".participants");
+        p.signers = json.readAddressArray(".signers");
         p.assets = json.readAddressArray(".assets");
         p.initialDeposits = _uints(".initialDeposits");
         p.challengePeriod = uint64(json.readUint(".challengePeriod"));
@@ -48,13 +49,14 @@ contract VectorsTest is Base {
         // Fund with the token at the vector's asset address.
         vm.etch(p.assets[1], type(MockToken).runtimeCode);
         MockToken tkn = MockToken(p.assets[1]);
+        bytes[] memory joins = json.readBytesArray(".joinSignatures");
         for (uint256 i; i < 2; ++i) {
             address who = p.participants[i];
             vm.deal(who, p.initialDeposits[i * 2]);
             tkn.mint(who, p.initialDeposits[i * 2 + 1]);
             vm.startPrank(who);
             tkn.approve(at, p.initialDeposits[i * 2 + 1]);
-            anchor.fund{value: p.initialDeposits[i * 2]}(sid);
+            anchor.fund{value: p.initialDeposits[i * 2]}(sid, joins[i]);
             vm.stopPrank();
         }
         assertEq(uint8(anchor.status(sid)), uint8(ILightsphereAnchor.Status.OPEN));

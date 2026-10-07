@@ -4,14 +4,13 @@ pragma solidity ^0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {LightsphereAnchor} from "../src/LightsphereAnchor.sol";
 import {LightsphereTypes as T} from "../src/LightsphereTypes.sol";
-import {MockHTS, MockHAS, MockToken} from "./mocks/Mocks.sol";
+import {MockHTS, MockToken} from "./mocks/Mocks.sol";
 
 abstract contract Base is Test {
     address internal constant HBAR = address(0);
     uint64 internal constant MIN_CHALLENGE = 1 hours;
 
     MockHTS internal hts;
-    MockHAS internal has;
     MockToken internal token;
 
     uint256 internal alicePk = 0xA11CE;
@@ -23,9 +22,7 @@ abstract contract Base is Test {
 
     function setUp() public virtual {
         vm.etch(address(0x167), type(MockHTS).runtimeCode);
-        vm.etch(address(0x16a), type(MockHAS).runtimeCode);
         hts = MockHTS(address(0x167));
-        has = MockHAS(address(0x16a));
         token = new MockToken();
         hts.register(address(token), false);
         alice = vm.addr(alicePk);
@@ -36,6 +33,15 @@ abstract contract Base is Test {
     function _sig(uint256 pk, bytes32 digest) internal pure returns (bytes memory) {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(pk, digest);
         return abi.encodePacked(r, s, v);
+    }
+
+    /// The JoinSphere signature a participant's signing key gives when funding.
+    function _join(LightsphereAnchor anchor, bytes32 sphereId, address participant, uint256 signerPk)
+        internal
+        view
+        returns (bytes memory)
+    {
+        return _sig(signerPk, anchor.joinDigest(sphereId, participant));
     }
 
     function _state(bytes32 sphereId, uint64 version, uint256[] memory balances, bool isFinal)
