@@ -47,8 +47,8 @@
 </p>
 
 > [!WARNING]
-> **Pre-release.** These contracts have not been audited and have run only on local networks, against mocks of
-> Hedera's system contracts. Do not use them with real value. See [docs/security.md](docs/security.md).
+> **Pre-release.** These contracts have not been audited and have run only on local networks, against a mock of
+> Hedera's token service. Do not use them with real value. See [docs/security.md](docs/security.md).
 
 <p align="center">
   <picture>
