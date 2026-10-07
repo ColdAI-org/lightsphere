@@ -1,0 +1,4 @@
+contracts/out/
+contracts/cache/
+harness/bin/
+ts/node_modules/

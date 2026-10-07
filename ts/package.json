@@ -1,0 +1,23 @@
+{
+  "name": "@lightsphere/client",
+  "version": "0.1.0",
+  "description": "Lightsphere HIP reference client: EIP-712 state signing, sphere ids, and a watchtower",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "abi": "node scripts/extract-abi.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.ts"
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "dependencies": {
+    "viem": "^2.57.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.1",
+    "typescript": "^5.9.3"
+  }
+}

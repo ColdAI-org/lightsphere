@@ -1,0 +1,80 @@
+{
+  "chainId": 296,
+  "verifyingContract": "0x00000000000000000000000000000000004C5350",
+  "domainSeparator": "0xa46635b65c81c3307df891f93714cde92dc53864a9ff39ad97a6d0366260b104",
+  "participants": [
+    "0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7",
+    "0x0376AAc07Ad725E01357B1725B5ceC61aE10473c"
+  ],
+  "privateKeys": [
+    "0x00000000000000000000000000000000000000000000000000000000000a11ce",
+    "0x0000000000000000000000000000000000000000000000000000000000000b0b"
+  ],
+  "assets": [
+    "0x0000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000456789"
+  ],
+  "initialDeposits": [
+    "1000000000",
+    "100",
+    "500000000",
+    "50"
+  ],
+  "challengePeriod": 3600,
+  "fundingDeadline": 4102444800,
+  "salt": "0x7e98a191c5671b2976c383199dce8e7f4bc0fc9b57c4366257ec976b67e76093",
+  "sphereId": "0xa793f17022753bc7d66ba45ee63a9ebdfdc0859218b08e7242e1a979f5209750",
+  "states": [
+    {
+      "sphereId": "0xa793f17022753bc7d66ba45ee63a9ebdfdc0859218b08e7242e1a979f5209750",
+      "version": 1,
+      "balances": [
+        "990000000",
+        "103",
+        "510000000",
+        "47"
+      ],
+      "appDataHash": "0x98e91ed201fff1ae4ce6265b5ced459d7e32b2dd578fedbe34a8f9b309d1c832",
+      "isFinal": false,
+      "digest": "0xbc28294471e7d6e07de3b6069e712789a4ad8957968f8c3431d7281b850c3b81",
+      "signatures": [
+        "0xc98fbdbef1d4f1c15d69e23f67a1f551173e1d5f5f8fbc5dbc4c4dda780439bc6a03f2a44b9bf2a17033512be5d9996ab801138af58c64abe9d1184ecaa70e801b",
+        "0xc73eb831da4b7cd8cd9fc63ed43260e4767ddca64e5fe1c2eb3097c34b0db1b10f06520b6a74258a97f13026d6e46529a57a84e8ad20446d4ad2c322b05cc1851c"
+      ]
+    },
+    {
+      "sphereId": "0xa793f17022753bc7d66ba45ee63a9ebdfdc0859218b08e7242e1a979f5209750",
+      "version": 41,
+      "balances": [
+        "980000000",
+        "106",
+        "520000000",
+        "44"
+      ],
+      "appDataHash": "0x3bfa6fd50525f813200e318cc184dde4cf94d5276d268b9c22b7cf015ce7b2e1",
+      "isFinal": false,
+      "digest": "0x68a2cd5c06c302a49cf5c262167c5db692f55b08e1ddab19bf34a23100697ade",
+      "signatures": [
+        "0x01876530dec3b7d74a6c2020149e8945d8ded16378fc15fbb38892c6000b9d6159e495454f41d4bd1bcd6788c74662424ead26f495c2cc460d87efa1022d1a671b",
+        "0xf318e882f1f645a7de5d13d3d2fe86935f07976706e238c4d5e076d081112106196b257f77b1beaedc8030c935d78716ec83f01bb1557714538087b0e8be441a1b"
+      ]
+    },
+    {
+      "sphereId": "0xa793f17022753bc7d66ba45ee63a9ebdfdc0859218b08e7242e1a979f5209750",
+      "version": 1000000,
+      "balances": [
+        "970000000",
+        "109",
+        "530000000",
+        "41"
+      ],
+      "appDataHash": "0x60276988bc3fd57200e3f6ce54eb809cc0f8e68f06115e1027b2726fd94dcfb8",
+      "isFinal": true,
+      "digest": "0xf57b10709baa68db45ae227b64be85218abe10ab3edcfff8f39c3fea31596fe9",
+      "signatures": [
+        "0xb0a5175c8ec505769c57a846705f3d5b1cc4b6f99639f4deecc298a8610235ff4598e736d5dffca58703d9604012edd84a0679f7bdcdfcfd52ce110f91a2ea5f1c",
+        "0xea5a48ba4e652aa01d89a53d83a5431dbc9d3bfcb65f514e6f7daddcc2f5ad8b3d6bdf85f3477c5239ef17dad84531c17c30d1e7b73c4ea75107993948707e5e1b"
+      ]
+    }
+  ]
+}
